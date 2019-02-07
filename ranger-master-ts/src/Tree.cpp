@@ -22,7 +22,7 @@ Tree::Tree() :
         false), data(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
         DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
-        0), activate_ts(false), block_size(0) {
+        0), activate_ts(false), block_size(0), bootstrap_ts("") {
 }
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -32,7 +32,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         split_values), child_nodeIDs(child_nodeIDs), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(
         0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(0), memory_saving_splitting(
         false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(
-        DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0), activate_ts(false), block_size(0) {
+        DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0), activate_ts(false), block_size(0), bootstrap_ts("") {
 }
 
 void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
@@ -40,7 +40,7 @@ void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_
     std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
-    double minprop, bool holdout, uint num_random_splits, uint max_depth, bool activate_ts, int (size_t) block_size) {
+    double minprop, bool holdout, uint num_random_splits, uint max_depth, bool activate_ts, int (size_t) block_size, std::string bootstrap_ts) {
 
   this->data = data;
   this->mtry = mtry;
@@ -74,6 +74,7 @@ void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_
   this->max_depth = max_depth;
   this->activate_ts = activate_ts;
   this->block_size = block_size;
+  this->bootstrap_ts = bootstrap_ts;
 }
 
 void Tree::grow(std::vector<double>* variable_importance) {
@@ -97,7 +98,8 @@ void Tree::grow(std::vector<double>* variable_importance) {
     }
   } else if (!manual_inbag->empty()) {
     setManualInbag();
-  } else {
+  } else { 
+	  //TODO : add bootstrap_timeseries functions.
     if(sample_with_replacement) {
       bootstrap();
     } else {

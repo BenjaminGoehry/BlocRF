@@ -16,6 +16,7 @@
 #include <random>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "globals.h"
 #include "Data.h"
@@ -41,7 +42,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, bool activate_ts, int (size_t) block_size );
+      uint max_depth, bool activate_ts, int (size_t) block_size, std::string bootstrap_ts );
 
   virtual void allocateMemory() = 0;
 
@@ -130,6 +131,11 @@ protected:
   // Pre-selected bootstrap samples
   const std::vector<size_t>* manual_inbag;
 
+  //Bootstrap time series
+  bool activate_ts;
+  int (size_t) block_size;
+  std::string bootstrap_ts;
+  
   // Splitting variable for each node
   std::vector<size_t> split_varIDs;
 
