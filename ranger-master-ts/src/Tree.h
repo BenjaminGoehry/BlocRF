@@ -98,7 +98,7 @@ protected:
   
   void bootstrapMovingBlock();
   void bootstrapStationaryBlock();
-  void bootstrapCircularMovingBlock()
+  void bootstrapCircularMovingBlock();
   void bootstrapNonOverlappingBlock();
   virtual void bootstrapClassWise();
   virtual void bootstrapWithoutReplacementClassWise();

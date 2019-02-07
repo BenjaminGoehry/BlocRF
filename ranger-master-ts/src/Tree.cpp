@@ -100,7 +100,13 @@ void Tree::grow(std::vector<double>* variable_importance) {
     setManualInbag();
   } else { 
 	  //TODO : add bootstrap_timeseries functions.
-    if(sample_with_replacement) {
+	if(activate_ts){
+		if(bootstrap_ts == "Moving Block") bootstrapMovingBlock();
+		if(bootstrap_ts == "Stationary") bootstrapStationaryBlock();
+		if(bootstrap_ts == "Circular Moving Block") bootstrapCircularMovingBlock()
+		if(bootstrap_ts == "Non Overlap Moving Block") bootstrapNonOverlappingBlock();
+	}
+    else if(sample_with_replacement) {
       bootstrap();
     } else {
       bootstrapWithoutReplacement();
