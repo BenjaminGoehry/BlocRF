@@ -16,7 +16,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   inbag = NULL, holdout = FALSE, quantreg = FALSE,
   oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
   verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  status.variable.name = NULL, classification = NULL,
+  activate.ts = FALSE, block.size = 10, bootstrap.ts = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -84,6 +85,12 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 \item{status.variable.name}{Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.}
 
 \item{classification}{Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.}
+
+\item{activate.ts}{Block bootstrapping activation.}
+
+\item{block.size}{If block bootstrapping activated, number of blocks.}
+
+\item{bootstrap.ts}{Block bootstrapping mode : "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks.}
 }
 \value{
 Object of class \code{ranger} with elements

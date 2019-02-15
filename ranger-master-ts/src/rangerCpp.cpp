@@ -60,7 +60,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
     uint num_random_splits, Eigen::SparseMatrix<double>& sparse_data, bool use_sparse_data, bool order_snps, 
     bool oob_error, uint max_depth, std::vector<std::vector<size_t>>& inbag, bool use_inbag,
-    bool activate_ts, int (size_t) block_size, std::string bootstrap_ts) {
+    bool activate_ts, uint block_size, uint bootstrap_ts_r) {
 
   Rcpp::List result;
 
@@ -143,6 +143,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     ImportanceMode importance_mode = (ImportanceMode) importance_mode_r;
     SplitRule splitrule = (SplitRule) splitrule_r;
     PredictionType prediction_type = (PredictionType) prediction_type_r;
+    BootstrapTS bootstrap_ts = (BootstrapTS) bootstrap_ts_r;
 
     // Init Ranger
     forest->initR(dependent_variable_name, std::move(data), mtry, num_trees, verbose_out, seed, num_threads,

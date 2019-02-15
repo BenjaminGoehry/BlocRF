@@ -96,6 +96,9 @@
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
+##' @param activate.ts Block bootstrapping activation.
+##' @param block.size If block bootstrapping activated, number of blocks.
+##' @param bootstrap.ts Block bootstrapping mode : "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
@@ -212,7 +215,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL) {
+                   classification = NULL, activate.ts = FALSE, block.size = 10, bootstrap.ts = NULL) {
   
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -601,6 +604,21 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     stop("Error: Please use only one option of split.select.weights and always.split.variables.")
   }
   
+  
+  ## Bootstrap type
+  bootstrap.ts.num <- 1
+  if (activate.ts) {
+    if (bootstrap.ts == "moving") {
+      bootstrap.ts.num <- 2
+    } else if (bootstrap.ts == "stationary") {
+      bootstrap.ts.num <- 3
+    } else if (bootstrap.ts == "circular") {
+      bootstrap.ts.num <- 4
+    } else {
+      stop("Error: Unknown block bootstrap type.")
+    }
+  }
+  
   ## Splitting rule
   if (is.null(splitrule)) {
     if (treetype == 5) {
@@ -756,7 +774,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights, 
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
                       num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth, 
-                      inbag, use.inbag)
+                      inbag, use.inbag, activate.ts, block.size, bootstrap.ts.num)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

@@ -16,7 +16,6 @@
 #include <random>
 #include <iostream>
 #include <stdexcept>
-#include <string>
 
 #include "globals.h"
 #include "Data.h"
@@ -42,7 +41,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, bool activate_ts, int (size_t) block_size, std::string bootstrap_ts );
+      uint max_depth, bool activate_ts, uint block_size, BootstrapTS bootstrap_ts);
 
   virtual void allocateMemory() = 0;
 
@@ -98,8 +97,9 @@ protected:
   
   void bootstrapMovingBlock();
   void bootstrapStationaryBlock();
-  void bootstrapCircularMovingBlock();
+  void bootstrapCircularBlock();
   void bootstrapNonOverlappingBlock();
+
   virtual void bootstrapClassWise();
   virtual void bootstrapWithoutReplacementClassWise();
 
@@ -131,11 +131,6 @@ protected:
   // Pre-selected bootstrap samples
   const std::vector<size_t>* manual_inbag;
 
-  //Bootstrap time series
-  bool activate_ts;
-  int (size_t) block_size;
-  std::string bootstrap_ts;
-  
   // Splitting variable for each node
   std::vector<size_t> split_varIDs;
 
@@ -146,8 +141,12 @@ protected:
   // Vector of left and right child node IDs, 0 for no child
   std::vector<std::vector<size_t>> child_nodeIDs;
 
-  // For each node a vector with IDs of samples in node
-  std::vector<std::vector<size_t>> sampleIDs;
+  // All sampleIDs in the tree, will be re-ordered while splitting
+  std::vector<size_t> sampleIDs;
+
+  // For each node a vector with start and end positions
+  std::vector<size_t> start_pos;
+  std::vector<size_t> end_pos;
 
   // IDs of OOB individuals, sorted
   std::vector<size_t> oob_sampleIDs;
@@ -184,6 +183,11 @@ protected:
   uint max_depth;
   uint depth;
   size_t last_left_nodeID;
+  
+  //Bootstrap time series
+  bool activate_ts;
+  uint block_size;
+  BootstrapTS bootstrap_ts;
 };
 
 } // namespace ranger

@@ -68,7 +68,13 @@ enum SplitRule {
   MAXSTAT = 4,
   EXTRATREES = 5
 };
-
+// Block-bootstrap mode
+enum BootstrapTS {
+  NONOVERLAPPING = 1,
+  MOVING = 2,
+  STATIONARY = 3,
+  CIRCULAR = 4
+};
 // Prediction type
 enum PredictionType {
   RESPONSE = 1,
@@ -88,6 +94,8 @@ const uint DEFAULT_MIN_NODE_SIZE_PROBABILITY = 10;
 const SplitRule DEFAULT_SPLITRULE = LOGRANK;
 const double DEFAULT_ALPHA = 0.5;
 const double DEFAULT_MINPROP = 0.1;
+const uint DEFAULT_BLOCK_SIZE = 10;
+const BootstrapTS DEFAULT_BOOTSTRAPTS = NONOVERLAPPING;
 
 const uint DEFAULT_MAXDEPTH = 0;
 const PredictionType DEFAULT_PREDICTIONTYPE = RESPONSE;
