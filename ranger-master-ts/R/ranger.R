@@ -215,7 +215,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL, 
                    dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL, activate.ts = FALSE, block.size = 10, bootstrap.ts = NULL) {
+                   classification = NULL, activate.ts = FALSE, block.size = 10, 
+                   bootstrap.ts = "nonoverlapping") {
   
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -606,9 +607,10 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   
   
   ## Bootstrap type
-  bootstrap.ts.num <- 1
   if (activate.ts) {
-    if (bootstrap.ts == "moving") {
+    if (bootstrap.ts == "nonoverlapping") {
+      bootstrap.ts.num <- 1
+    } else if (bootstrap.ts == "moving") {
       bootstrap.ts.num <- 2
     } else if (bootstrap.ts == "stationary") {
       bootstrap.ts.num <- 3
@@ -617,6 +619,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     } else {
       stop("Error: Unknown block bootstrap type.")
     }
+  } else {
+    bootstrap.ts.num <- 0
   }
   
   ## Splitting rule

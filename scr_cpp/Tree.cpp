@@ -569,7 +569,7 @@ void Tree::bootstrapMovingBlock() {
   inbag_counts.resize(num_samples, 0);
   
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= k; ++s) {
+  for (size_t s = 0; s < k; ++s) {
     size_t draw = unif_dist(random_number_generator);
     // loop to take the selected block
     // stop when the inbag sample is full
@@ -605,9 +605,11 @@ void Tree::bootstrapStationaryBlock() {
   
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
   // TODO the probability should be adjusted manually by user?
-  std::geometric_distribution<size_t> geom_dist(1.0 / block_size);
+  std::geometric_distribution<size_t> geom_dist(1 / block_size);
   
   // Start with all samples OOB
+  // TODO need to add parameter to Tree class : bool activate_ts, and int (size_t) block_size
+  //size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
   
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
@@ -617,8 +619,8 @@ void Tree::bootstrapStationaryBlock() {
     // loop to take the selected block
     for (size_t i = 0; i < len; ++i) {
       // same idea as circular
-      size_t ind = (size_t) (draw + i) % num_samples;
       if (sampleIDs.size() < num_samples_inbag) {
+        size_t ind = (size_t) (draw + i) % num_samples;
         sampleIDs.push_back(ind);
         ++inbag_counts[ind];
       }
@@ -655,7 +657,7 @@ void Tree::bootstrapCircularBlock() {
   inbag_counts.resize(num_samples, 0);
   
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= k; ++s) {
+  for (size_t s = 0; s < k; ++s) {
     size_t draw = unif_dist(random_number_generator);
     // loop to take the selected block
     for (size_t i = 0; i < block_size; ++i) {
@@ -698,14 +700,13 @@ void Tree::bootstrapNonOverlappingBlock() {
   std::uniform_int_distribution<size_t> unif_dist(0, k - 1);
   
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= (k+1); ++s) {
+  for (size_t s = 0; s < k; ++s) {
     size_t draw = unif_dist(random_number_generator);
     // loop to take the selected block
     for (size_t i = 0; i < block_size; ++i) {
-      size_t ind = (size_t) draw * block_size + i;
-      if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
-        sampleIDs.push_back(ind);
-        ++inbag_counts[ind];
+      if (sampleIDs.size() < num_samples_inbag && draw * block_size + i < num_samples) {
+        sampleIDs.push_back(draw * block_size + i);
+        ++inbag_counts[draw * block_size + i];
       }
     }
   }
