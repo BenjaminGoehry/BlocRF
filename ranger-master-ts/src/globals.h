@@ -12,7 +12,7 @@ R package "ranger" under GPL3 license.
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
-namespace ranger {
+namespace rangerts {
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

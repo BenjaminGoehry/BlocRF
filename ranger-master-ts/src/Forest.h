@@ -28,7 +28,7 @@
 #include "Tree.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class Forest {
 public:
@@ -230,7 +230,7 @@ protected:
 
   // Bootstrap weights
   std::vector<double> case_weights;
-  
+
   //Bootstrap time series
   bool activate_ts;
   uint block_size;

@@ -19,7 +19,7 @@
 #include "utility.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class DataDouble: public Data {
 public:

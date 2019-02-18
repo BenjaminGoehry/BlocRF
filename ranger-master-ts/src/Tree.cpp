@@ -14,7 +14,7 @@
 #include "Tree.h"
 #include "utility.h"
 
-namespace ranger {
+namespace rangerts {
 
 Tree::Tree() :
     dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
@@ -115,7 +115,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
       }
     }
   }
-  
+
 
   // Init start and end positions
   start_pos[0] = 0;
@@ -556,18 +556,18 @@ void Tree::bootstrapWithoutReplacementWeighted() {
 void Tree::bootstrapMovingBlock() {
   // Use fraction (default 63.21%) of the samples
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
-  
+
   // Reserve space, reserve a little more to be save)
   sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
-  
+
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size);
-  
+
   // Start with all samples OOB
   // TODO need to add parameter to Tree class : bool activate_ts, and block_size
   size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
-  
+
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
   for (size_t s = 0; s <= k; ++s) {
     size_t draw = unif_dist(random_number_generator);
@@ -580,7 +580,7 @@ void Tree::bootstrapMovingBlock() {
       }
     }
   }
-  
+
   // Save OOB samples
   for (size_t s = 0; s < inbag_counts.size(); ++s) {
     if (inbag_counts[s] == 0) {
@@ -588,7 +588,7 @@ void Tree::bootstrapMovingBlock() {
     }
   }
   num_samples_oob = oob_sampleIDs.size();
-  
+
   if (!keep_inbag) {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();
@@ -598,18 +598,18 @@ void Tree::bootstrapMovingBlock() {
 void Tree::bootstrapStationaryBlock() {
   // Use fraction (default 63.21%) of the samples
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
-  
+
   // Reserve space, reserve a little more to be save)
   sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
-  
+
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
   // TODO the probability should be adjusted manually by user?
   std::geometric_distribution<size_t> geom_dist(1.0 / block_size);
-  
+
   // Start with all samples OOB
   inbag_counts.resize(num_samples, 0);
-  
+
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
   while (sampleIDs.size() < num_samples_inbag) {
     size_t draw = unif_dist(random_number_generator);
@@ -624,7 +624,7 @@ void Tree::bootstrapStationaryBlock() {
       }
     }
   }
-  
+
   // Save OOB samples
   for (size_t s = 0; s < inbag_counts.size(); ++s) {
     if (inbag_counts[s] == 0) {
@@ -632,7 +632,7 @@ void Tree::bootstrapStationaryBlock() {
     }
   }
   num_samples_oob = oob_sampleIDs.size();
-  
+
   if (!keep_inbag) {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();
@@ -642,18 +642,18 @@ void Tree::bootstrapStationaryBlock() {
 void Tree::bootstrapCircularBlock() {
   // Use fraction (default 63.21%) of the samples
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
-  
+
   // Reserve space, reserve a little more to be save)
   sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
-  
+
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
-  
+
   // Start with all samples OOB
   // TODO need to add parameter to Tree class : bool activate_ts, and int (size_t) block_size
   size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
-  
+
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
   for (size_t s = 0; s <= k; ++s) {
     size_t draw = unif_dist(random_number_generator);
@@ -667,7 +667,7 @@ void Tree::bootstrapCircularBlock() {
       }
     }
   }
-  
+
   // Save OOB samples
   for (size_t s = 0; s < inbag_counts.size(); ++s) {
     if (inbag_counts[s] == 0) {
@@ -675,7 +675,7 @@ void Tree::bootstrapCircularBlock() {
     }
   }
   num_samples_oob = oob_sampleIDs.size();
-  
+
   if (!keep_inbag) {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();
@@ -685,18 +685,18 @@ void Tree::bootstrapCircularBlock() {
 void Tree::bootstrapNonOverlappingBlock() {
   // Use fraction (default 63.21%) of the samples
   size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
-  
+
   // Reserve space, reserve a little more to be save)
   sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
-  
+
   // Start with all samples OOB
   // TODO need to add parameter to Tree class : bool activate_ts, and int (size_t) block_size
   size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
-  
+
   std::uniform_int_distribution<size_t> unif_dist(0, k - 1);
-  
+
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
   for (size_t s = 0; s <= (k+1); ++s) {
     size_t draw = unif_dist(random_number_generator);
@@ -709,7 +709,7 @@ void Tree::bootstrapNonOverlappingBlock() {
       }
     }
   }
-  
+
   // Save OOB samples
   for (size_t s = 0; s < inbag_counts.size(); ++s) {
     if (inbag_counts[s] == 0) {
@@ -717,7 +717,7 @@ void Tree::bootstrapNonOverlappingBlock() {
     }
   }
   num_samples_oob = oob_sampleIDs.size();
-  
+
   if (!keep_inbag) {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();

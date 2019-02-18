@@ -1,6 +1,6 @@
 ## Tests for random forests for probability estimation
 
-library(ranger)
+library(rangerts)
 context("ranger_prob")
 
 ## Initialize random forest
@@ -19,7 +19,7 @@ test_that("probability estimations are a matrix with correct size", {
 })
 
 test_that("growing works for single observations, probability prediction", {
-  expect_warning(rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE), 
+  expect_warning(rf <- ranger(Species ~ ., iris[1, ], write.forest = TRUE, probability = TRUE),
                  "Dropped unused factor level\\(s\\) in dependent variable\\: versicolor\\, virginica\\.")
   expect_is(rf$predictions, "matrix")
 })
@@ -46,44 +46,44 @@ test_that("Probability estimation works correctly if labels are reversed", {
   n <- 50
   a1 <- c(rnorm(n, 3, sd = 2), rnorm(n, 8, sd = 2))
   a2 <- c(rnorm(n, 8, sd = 2), rnorm(n, 3, sd = 2))
-  
+
   ## create labels for data
   labels <- as.factor(c(rep("0", n), rep("1", n)))
   dat <- data.frame(label = labels, a1, a2)
-  
-  labels.rev <- as.factor(c(rep("1", n), rep("0", n))) 
+
+  labels.rev <- as.factor(c(rep("1", n), rep("0", n)))
   dat.rev <- data.frame(label = labels.rev, a1, a2)
-  
+
   ## Train
-  rf <- ranger(dependent.variable.name = "label", data = dat, probability = TRUE, 
+  rf <- ranger(dependent.variable.name = "label", data = dat, probability = TRUE,
                write.forest = TRUE, num.trees = 5)
-  rf.rev <- ranger(dependent.variable.name = "label", data = dat.rev, probability = TRUE, 
+  rf.rev <- ranger(dependent.variable.name = "label", data = dat.rev, probability = TRUE,
                    write.forest = TRUE, num.trees = 5)
-  
+
   ## Check OOB predictions
   expect_gte(mean(rf$predictions[1:n, "0"], na.rm = TRUE), 0.5)
   expect_gte(mean(rf$predictions[(n+1):(2*n), "1"], na.rm = TRUE), 0.5)
-  
+
   expect_gte(mean(rf.rev$predictions[1:n, "1"], na.rm = TRUE), 0.5)
   expect_gte(mean(rf.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
-  
+
   ## Check predict() predictions
   pred <- predict(rf, dat)
   expect_gte(mean(pred$predictions[1:n, "0"], na.rm = TRUE), 0.5)
   expect_gte(mean(pred$predictions[(n+1):(2*n), "1"], na.rm = TRUE), 0.5)
-  
+
   pred.rev <- predict(rf.rev, dat.rev)
   expect_gte(mean(pred.rev$predictions[1:n, "1"], na.rm = TRUE), 0.5)
   expect_gte(mean(pred.rev$predictions[(n+1):(2*n), "0"], na.rm = TRUE), 0.5)
 })
 
 test_that("Probability estimation works correctly if first or second factor level empty", {
-  expect_warning(rf <- ranger(Species ~ ., iris[51:150, ], probability = TRUE), 
+  expect_warning(rf <- ranger(Species ~ ., iris[51:150, ], probability = TRUE),
                  "^Dropped unused factor level\\(s\\) in dependent variable\\: setosa\\.")
   expect_silent(pred <- predict(rf, iris[101:150, ]))
   expect_gte(mean(pred$predictions[1:50, "virginica"], na.rm = TRUE), 0.9)
-  
-  expect_warning(rf <- ranger(Species ~ ., iris[c(101:150, 51:100), ], probability = TRUE), 
+
+  expect_warning(rf <- ranger(Species ~ ., iris[c(101:150, 51:100), ], probability = TRUE),
                  "^Dropped unused factor level\\(s\\) in dependent variable\\: setosa\\.")
   expect_silent(pred <- predict(rf, iris[c(101:150, 51:100), ]))
   expect_gte(mean(pred$predictions[1:50, "virginica"], na.rm = TRUE), 0.9)
@@ -101,7 +101,7 @@ test_that("predict.all for probability returns 3d array of size samples x classe
   rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE, probability = TRUE)
   pred <- predict(rf, iris, predict.all = TRUE)
   expect_is(pred$predictions, "array")
-  expect_equal(dim(pred$predictions), 
+  expect_equal(dim(pred$predictions),
                c(nrow(iris), nlevels(iris$Species), rf$num.trees))
 })
 

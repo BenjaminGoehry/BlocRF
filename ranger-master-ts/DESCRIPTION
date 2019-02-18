@@ -1,11 +1,11 @@
-Package: ranger
+Package: rangerts
 Type: Package
-Title: A Fast Implementation of Random Forests, with block bootstrapping for time series.
+Title: A Fast Implementation of Random Forests with block bootstrapping for time series
 Version: 0.0.1
 Date: 2019-02-14
 Author: Marvin N. Wright [aut, cre], Stefan Wager [ctb], Philipp Probst [ctb], Hui YAN[ctb], Benjamin Goehry[ctb]
 Maintainer: Marvin N. Wright <cran@wrig.de>, Hui YAN <workspace.yan@gmail.com>
-Description: The original package of ranger + block bootstrapping for time series.
+Description: The original package of ranger and block bootstrapping for time series.
 License: GPL-3
 Imports: Rcpp (>= 0.11.2), Matrix
 LinkingTo: Rcpp, RcppEigen
@@ -16,7 +16,5 @@ Suggests:
     knitr,
     rmarkdown
 RoxygenNote: 6.1.1
-URL: https://github.com/imbs-hl/ranger
-BugReports: https://github.com/imbs-hl/ranger/issues
 Encoding: UTF-8
 VignetteBuilder: knitr

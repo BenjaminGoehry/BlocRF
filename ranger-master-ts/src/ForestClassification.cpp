@@ -22,7 +22,7 @@
 #include "TreeClassification.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 void ForestClassification::loadForest(size_t dependent_varID, size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,

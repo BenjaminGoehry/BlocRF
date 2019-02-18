@@ -1,4 +1,4 @@
-library(ranger)
+library(rangerts)
 library(survival)
 context("ranger_maxstat")
 
@@ -26,21 +26,21 @@ test_that("maxstat splitting not working for classification", {
 })
 
 test_that("maxstat impurity importance is positive", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, 
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5,
                splitrule = "maxstat", importance = "impurity")
   expect_gt(mean(rf$variable.importance), 0)
-  
-  rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5, 
+
+  rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5,
                splitrule = "maxstat", importance = "impurity")
   expect_gt(mean(rf$variable.importance), 0)
 })
 
 test_that("maxstat corrected impurity importance is positive (on average)", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5, 
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5,
                splitrule = "maxstat", importance = "impurity_corrected")
   expect_gt(mean(rf$variable.importance), 0)
-  
-  rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5, 
+
+  rf <- ranger(Sepal.Length ~ ., iris, num.trees = 5,
                splitrule = "maxstat", importance = "impurity_corrected")
   expect_gt(mean(rf$variable.importance), 0)
 })

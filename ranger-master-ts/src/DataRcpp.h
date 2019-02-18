@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------------
  This file is part of Ranger.
- 
+
  Ranger is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -34,7 +34,7 @@ http://www.imbs-luebeck.de
 #include "utility.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class DataRcpp: public Data {
 public:
@@ -46,12 +46,12 @@ public:
       this->num_cols = num_cols;
       this->num_cols_no_snp = num_cols;
     }
-  
+
   DataRcpp(const DataRcpp&) = delete;
   DataRcpp& operator=(const DataRcpp&) = delete;
-  
+
   virtual ~DataRcpp() override = default;
-  
+
   double get(size_t row, size_t col) const override {
     // Use permuted data for corrected impurity importance
     size_t col_permuted = col;
@@ -59,26 +59,26 @@ public:
       col = getUnpermutedVarID(col);
       row = getPermutedSampleID(row);
     }
-    
+
     if (col < num_cols_no_snp) {
       return data[col * num_rows + row];
     } else {
       return getSnp(row, col, col_permuted);
     }
   }
-  
+
   void reserveMemory() override {
     // Not needed
   }
-  
+
   void set(size_t col, size_t row, double value, bool& error) override {
     data[col * num_rows + row] = value;
   }
-  
+
 private:
   Rcpp::NumericMatrix data;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* DATARCPP_H_ */

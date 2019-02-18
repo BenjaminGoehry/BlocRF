@@ -1,6 +1,6 @@
 ## Tests for random forests for survival analysis
 
-library(ranger)
+library(rangerts)
 library(survival)
 context("ranger_surv")
 
@@ -28,8 +28,8 @@ test_that("Alternative interface works for survival", {
 
 test_that("Alternative interface prediction works for survival", {
   rf <- ranger(dependent.variable.name = "time", status.variable.name = "status", data = veteran, num.trees = 10)
-  expect_equal(predict(rf, veteran)$num.independent.variables, ncol(veteran) - 2) 
-  expect_equal(predict(rf, veteran[, setdiff(names(veteran), c("time", "status"))])$num.independent.variables, ncol(veteran) - 2) 
+  expect_equal(predict(rf, veteran)$num.independent.variables, ncol(veteran) - 2)
+  expect_equal(predict(rf, veteran[, setdiff(names(veteran), c("time", "status"))])$num.independent.variables, ncol(veteran) - 2)
 })
 
 test_that("Matrix interface works for survival", {
@@ -61,7 +61,7 @@ test_that("unique death times in survival result is right", {
 })
 
 test_that("C-index splitting works", {
-  rf <- ranger(Surv(time, status) ~ ., data = veteran, 
+  rf <- ranger(Surv(time, status) ~ ., data = veteran,
                splitrule = "C", num.trees = 10)
   expect_equal(rf$treetype, "Survival")
 })
@@ -82,12 +82,12 @@ test_that("No error if survival tree without OOB observations", {
 test_that("predict.all for survival returns 3d array of size samples x times x trees", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
   pred <- predict(rf, veteran, predict.all = TRUE)
-  
+
   expect_is(pred$survival, "array")
-  expect_equal(dim(pred$survival), 
+  expect_equal(dim(pred$survival),
                c(nrow(veteran), length(pred$unique.death.times), rf$num.trees))
   expect_is(pred$chf, "array")
-  expect_equal(dim(pred$chf), 
+  expect_equal(dim(pred$chf),
                c(nrow(veteran), length(pred$unique.death.times), rf$num.trees))
 })
 
@@ -101,7 +101,7 @@ test_that("Mean of predict.all for survival is equal to forest prediction", {
 test_that("timepoints() function returns timepoints", {
   rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 5)
   expect_equal(timepoints(rf), rf$unique.death.times)
-  
+
   pred <- predict(rf, veteran)
   expect_equal(timepoints(pred), rf$unique.death.times)
 })
@@ -109,12 +109,12 @@ test_that("timepoints() function returns timepoints", {
 test_that("timepoints() working on survival forest only", {
   rf <- ranger(Species ~ ., iris, num.trees = 5)
   expect_error(timepoints(rf), "No timepoints found. Object is no Survival forest.")
-  
+
   pred <- predict(rf, iris)
   expect_error(timepoints(pred), "No timepoints found. Object is no Survival prediction object.")
 })
 
 test_that("Survival error without covariates", {
-  expect_error(ranger(Surv(time, status) ~ ., veteran[, c("time", "status")], num.trees = 5), 
+  expect_error(ranger(Surv(time, status) ~ ., veteran[, c("time", "status")], num.trees = 5),
                "Error: No covariates found.")
 })

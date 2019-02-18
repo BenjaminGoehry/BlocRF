@@ -17,7 +17,7 @@
 #include "globals.h"
 #include "Tree.h"
 
-namespace ranger {
+namespace rangerts {
 
 class TreeRegression: public Tree {
 public:
@@ -91,6 +91,6 @@ private:
   std::vector<double> sums;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* TREEREGRESSION_H_ */

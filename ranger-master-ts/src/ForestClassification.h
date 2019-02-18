@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "Forest.h"
 
-namespace ranger {
+namespace rangerts {
 
 class ForestClassification: public Forest {
 public:

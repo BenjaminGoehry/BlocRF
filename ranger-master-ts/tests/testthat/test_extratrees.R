@@ -1,4 +1,4 @@
-library(ranger)
+library(rangerts)
 library(survival)
 context("ranger_extratrees")
 
@@ -10,12 +10,12 @@ test_that("extratrees splitting works for classification", {
 
 test_that("extratrees unordered splitting works for classification", {
   n <- 20
-  dat <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
-                    y = factor(rbinom(n, 1, 0.5)), 
+  dat <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE),
+                    y = factor(rbinom(n, 1, 0.5)),
                     stringsAsFactors = FALSE)
-  rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2, 
+  rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2,
                splitrule = "extratrees", respect.unordered.factors = 'partition')
-  
+
   expect_is(rf, "ranger")
 })
 
@@ -27,11 +27,11 @@ test_that("extratrees splitting works for probability estimation", {
 
 test_that("extratrees unordered splitting works for probability estimation", {
   n <- 20
-  dat <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE), 
-                    y = factor(rbinom(n, 1, 0.5)), 
+  dat <- data.frame(x = sample(c("A", "B", "C", "D"), n, replace = TRUE),
+                    y = factor(rbinom(n, 1, 0.5)),
                     stringsAsFactors = FALSE)
-  rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2, 
-               splitrule = "extratrees", respect.unordered.factors = 'partition', 
+  rf <- ranger(y ~ ., data = dat, num.trees = 5, min.node.size = n/2,
+               splitrule = "extratrees", respect.unordered.factors = 'partition',
                probability = TRUE)
   expect_is(rf, "ranger")
 })

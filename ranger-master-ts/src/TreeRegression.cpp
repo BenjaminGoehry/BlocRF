@@ -19,7 +19,7 @@
 #include "TreeRegression.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 TreeRegression::TreeRegression(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
     std::vector<double>& split_values) :

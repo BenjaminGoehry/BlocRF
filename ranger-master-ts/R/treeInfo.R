@@ -28,18 +28,18 @@
 
 
 #' Tree information in human readable format
-#' 
-#' Extract tree information of a \code{ranger} object. 
-#' 
-#' Node and variable ID's are 0-indexed, i.e., node 0 is the root node. 
-#' If the formula interface is used in the \code{ranger} call, the variable ID's are usually different to the original data used to grow the tree. 
+#'
+#' Extract tree information of a \code{ranger} object.
+#'
+#' Node and variable ID's are 0-indexed, i.e., node 0 is the root node.
+#' If the formula interface is used in the \code{ranger} call, the variable ID's are usually different to the original data used to grow the tree.
 #' Refer to the variable name instead to be sure.
-#' 
-#' Splitting at unordered factors (nominal variables) depends on the option \code{respect.unordered.factors} in the \code{ranger} call. 
-#' For the "ignore" and "order" approaches, all values smaller or equal the \code{splitval} value go to the left and all values larger go to the right, as usual. 
+#'
+#' Splitting at unordered factors (nominal variables) depends on the option \code{respect.unordered.factors} in the \code{ranger} call.
+#' For the "ignore" and "order" approaches, all values smaller or equal the \code{splitval} value go to the left and all values larger go to the right, as usual.
 #' However, with "order" the values correspond to the order in \code{object$forest$covariate.levels} instead of the original order (usually alphabetical).
 #' In the "partition" mode, the \code{splitval} values for unordered factor are comma separated lists of values, representing the factor levels (in the original order) going to the right.
-#' 
+#'
 #' @param object \code{ranger} object.
 #' @param tree Number of the tree of interest.
 #' @return A data.frame with the columns
@@ -54,7 +54,7 @@
 #'       \code{prediction} \tab One column with the predicted class (factor) for classification and the predicted numerical value for regression. One probability per class for probability estimation in several columns. Nothing for survival, refer to \code{object$forest$chf} for the CHF node predictions. \cr
 #'   }
 #' @examples
-#' require(ranger)
+#' require(rangerts)
 #' rf <- ranger(Species ~ ., data = iris)
 #' treeInfo(rf, 1)
 #' @seealso \code{\link{ranger}}
@@ -63,7 +63,7 @@
 treeInfo <- function(object, tree = 1) {
   if (class(object) != "ranger" & class(object) != "holdoutRF") {
     stop("Error: Invalid class of input object.")
-  } 
+  }
   forest <- object$forest
   if (is.null(forest)) {
     stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
@@ -84,15 +84,15 @@ treeInfo <- function(object, tree = 1) {
   if (tree > forest$num.trees) {
     stop("Error: Requesting tree ", tree, ", but forest has only ", forest$num.trees, " trees.")
   }
-  
+
   result <- data.frame(nodeID = 0:(length(forest$split.values[[tree]]) - 1),
-                       leftChild = forest$child.nodeIDs[[tree]][[1]], 
-                       rightChild = forest$child.nodeIDs[[tree]][[2]], 
-                       splitvarID = forest$split.varIDs[[tree]], 
+                       leftChild = forest$child.nodeIDs[[tree]][[1]],
+                       rightChild = forest$child.nodeIDs[[tree]][[2]],
+                       splitvarID = forest$split.varIDs[[tree]],
                        splitvarName = "X",
-                       splitval = forest$split.values[[tree]], 
+                       splitval = forest$split.values[[tree]],
                        terminal = FALSE)
-  
+
   result$leftChild[result$leftChild == 0] <- NA
   result$rightChild[result$rightChild == 0] <- NA
   result$terminal[is.na(result$leftChild)] <- TRUE
@@ -100,7 +100,7 @@ treeInfo <- function(object, tree = 1) {
   result$splitvarName[result$terminal] <- NA
   result$splitval[result$terminal] <- NA
 
-  ## Get names of splitting variables 
+  ## Get names of splitting variables
   # should be -1 for all >= dependent.varID but +1 change for 1-index
   # for survival another -1 if >= status.varID
   independent.varID <- result$splitvarID
@@ -119,7 +119,7 @@ treeInfo <- function(object, tree = 1) {
       paste(which(as.logical(intToBits(x))), collapse = ",")
     })
   }
-  
+
   ## Prediction
   if (forest$treetype == "Classification") {
     result$prediction <- forest$split.values[[tree]]
@@ -140,6 +140,6 @@ treeInfo <- function(object, tree = 1) {
   } else {
     stop("Error: Unknown tree type.")
   }
-  
+
   result
 }

@@ -17,7 +17,8 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   oob.error = TRUE, num.threads = NULL, save.memory = FALSE,
   verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
   status.variable.name = NULL, classification = NULL,
-  activate.ts = FALSE, block.size = 10, bootstrap.ts = NULL)
+  activate.ts = FALSE, block.size = 10,
+  bootstrap.ts = "nonoverlapping")
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -134,23 +135,23 @@ In contrast to other implementations, each tree returns a probability estimate a
 For details see Malley et al. (2012).
 
 Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
-For survival all nodes contain at \code{min.node.size} samples. 
+For survival all nodes contain at \code{min.node.size} samples.
 Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
-In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
-Weights do not need to sum up to 1, they will be normalized later. 
+In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected.
+Weights do not need to sum up to 1, they will be normalized later.
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 Names of the \code{split.select.weights} vector are ignored.
 The usage of \code{split.select.weights} can increase the computation times for large forests.
 
-Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
-For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
+Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}:
+For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting.
 For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
 For multiclass classification the factor levels are ordered by the first principal component of the weighted covariance matrix of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available).
-The use of 'order' is recommended, as it computationally fast and can handle an unlimited number of factor levels. 
+The use of 'order' is recommended, as it computationally fast and can handle an unlimited number of factor levels.
 Note that the factors are only reordered once and not again in each split.
 
 The 'impurity_corrected' importance measure is unbiased in terms of the number of categories and category frequencies and is almost as fast as the standard impurity importance.
-It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient. 
+It is a modified version of the method by Sandri & Zuccolotto (2008), which is faster and more memory efficient.
 See Nembrini et al. (2018) for details.
 This importance measure can be combined with the methods to estimate p-values in \code{\link{importance_pvalues}}.
 
@@ -158,19 +159,19 @@ For a large number of variables and data frames as input data the formula interf
 Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
 Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing.
 
-For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
+For GWAS data consider combining \code{ranger} with the \code{GenABEL} package.
 See the Examples section below for a demonstration using \code{Plink} data.
-All SNPs in the \code{GenABEL} object will be used for splitting. 
-To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
+All SNPs in the \code{GenABEL} object will be used for splitting.
+To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula.
 Note that missing values are treated as an extra category while splitting.
 
 See \url{https://github.com/imbs-hl/ranger} for the development version.
 
-With recent R versions, multithreading on Windows platforms should just work. 
+With recent R versions, multithreading on Windows platforms should just work.
 If you compile yourself, the new RTools toolchain is required.
 }
 \examples{
-require(ranger)
+require(rangerts)
 
 ## Classification forest with default settings
 ranger(Species ~ ., data = iris)
@@ -214,15 +215,15 @@ ranger(trait ~ ., data = dat.gwaa)
 \references{
 \itemize{
   \item Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
-  \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}. 
+  \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}.
   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med 36:1272-1284. \url{https://doi.org/10.1002/sim.7212}.
   \item Nembrini, S., Koenig, I. R. & Wright, M. N. (2018). The revival of the Gini Importance? Bioinformatics. \url{https://doi.org/10.1093/bioinformatics/bty373}.
-  \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \url{https://doi.org/10.1023/A:1010933404324}. 
-  \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}. 
+  \item Breiman, L. (2001). Random forests. Mach Learn, 45:5-32. \url{https://doi.org/10.1023/A:1010933404324}.
+  \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}.
   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{https://doi.org/10.3414/ME00-01-0052}.
   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}.
-  \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.  
+  \item Meinshausen (2006). Quantile Regression Forests. J Mach Learn Res 7:983-999. \url{http://www.jmlr.org/papers/v7/meinshausen06a.html}.
   \item Sandri, M. & Zuccolotto, P. (2008). A bias correction algorithm for the Gini variable importance measure in classification trees. J Comput Graph Stat, 17:611-628. \url{https://doi.org/10.1198/106186008X344522}.
   \item Coppersmith D., Hong S. J., Hosking J. R. (1999). Partitioning nominal attributes in decision trees. Data Min Knowl Discov 3:197-217. \url{https://doi.org/10.1023/A:1009869804967}.
   }

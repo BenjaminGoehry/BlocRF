@@ -1,4 +1,4 @@
-library(ranger)
+library(rangerts)
 library(survival)
 context("genabel")
 

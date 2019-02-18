@@ -1,4 +1,4 @@
-library(ranger)
+library(rangerts)
 library(survival)
 
 context("importance")
@@ -9,7 +9,7 @@ if (requireNamespace("GenABEL", quietly = TRUE)) {
 }
 
 ## 0 noise variables
-rf_p0 <- ranger(Species ~., iris, num.trees = 100, 
+rf_p0 <- ranger(Species ~., iris, num.trees = 100,
                 importance = "permutation", write.forest = TRUE)
 holdout_p0 <- holdoutRF(Species ~., iris, num.trees = 10)
 
@@ -45,7 +45,7 @@ test_that("Importance p-values Janitza: error if no importance", {
   rf_none <- ranger(Species ~., iris, num.trees = 10, importance = "none", write.forest = TRUE)
   expect_error(importance_pvalues(rf_none, method = "janitza"))
 })
-  
+
 test_that("Importance p-values Janitza: error if Gini importance", {
   rf_imp <- ranger(Species ~., iris, num.trees = 10, importance = "impurity", write.forest = TRUE)
   expect_error(importance_pvalues(rf_imp, method = "janitza"))
@@ -113,13 +113,13 @@ test_that("HoldoutRF ... argument working", {
 test_that("HoldoutRF working with formula", {
   rf <- holdoutRF(Species ~., iris, num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
-  
+
   rf <- holdoutRF(Species ~., data = iris, num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
-  
+
   rf <- holdoutRF(formula = Species ~., iris, num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
-  
+
   rf <- holdoutRF(data = iris, formula = Species ~., num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
 })
@@ -127,23 +127,23 @@ test_that("HoldoutRF working with formula", {
 test_that("HoldoutRF working with dependent.variable.name", {
   rf <- holdoutRF(dependent.variable.name = "Species", data = iris, num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
-  
+
   rf <- holdoutRF(data = iris, dependent.variable.name = "Species", num.trees = 10)
   expect_equal(rf$rf1$treetype, "Classification")
 })
 
 test_that("HoldoutRF not working if importance argument used", {
-  expect_error(holdoutRF(Species ~., iris, num.trees = 10, importance = "impurity"), 
+  expect_error(holdoutRF(Species ~., iris, num.trees = 10, importance = "impurity"),
                "Error: Argument 'importance' not supported in holdoutRF.")
 })
 
 test_that("HoldoutRF not working if replace argument used", {
-  expect_error(holdoutRF(Species ~., iris, num.trees = 10, replace = TRUE), 
+  expect_error(holdoutRF(Species ~., iris, num.trees = 10, replace = TRUE),
                "Error: Argument 'replace' not supported in holdoutRF.")
 })
 
 ## Survival, 0 noise variables
-rf_p0_surv <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10, 
+rf_p0_surv <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10,
                      importance = "permutation", write.forest = TRUE)
 #holdout_p0_surv <- holdoutRF(Surv(time, status) ~ ., veteran, num.trees = 10)
 
@@ -170,18 +170,18 @@ test_that("Survival importance p-values Altmann: returns correct dimensions", {
 })
 
 test_that("Survival importance p-values Altmann working with corrected impurity importance", {
-  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10, 
+  rf <- ranger(Surv(time, status) ~ ., veteran, num.trees = 10,
                importance = "impurity_corrected")
-  
+
   vimp <- importance_pvalues(rf, method = "altmann", formula = Surv(time, status) ~ ., data = veteran)
   expect_is(vimp, "matrix")
   expect_equal(dim(vimp), c(6, 2))
 })
 
 test_that("Survival importance p-values Janitza working with corrected impurity importance", {
-  rf <- ranger(Surv(time, status) ~ ., dat_n100_surv, num.trees = 10, 
+  rf <- ranger(Surv(time, status) ~ ., dat_n100_surv, num.trees = 10,
                importance = "impurity_corrected")
-  
+
   expect_warning(vimp <- importance_pvalues(rf, method = "janitza"))
   expect_is(vimp, "matrix")
   expect_equal(dim(vimp), c(106, 2))

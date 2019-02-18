@@ -34,7 +34,7 @@
 #include "utility.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class DataSparse: public Data {
 public:

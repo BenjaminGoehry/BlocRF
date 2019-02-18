@@ -17,7 +17,7 @@
 
 #include "DataChar.h"
 
-namespace ranger {
+namespace rangerts {
 
 DataChar::DataChar(double* data_double, std::vector<std::string> variable_names, size_t num_rows, size_t num_cols,
     bool& error) {

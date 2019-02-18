@@ -17,7 +17,7 @@
 #include "globals.h"
 #include "Tree.h"
 
-namespace ranger {
+namespace rangerts {
 
 class TreeClassification: public Tree {
 public:

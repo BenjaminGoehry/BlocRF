@@ -1,6 +1,6 @@
 ## Tests for split select weights
 
-library(ranger)
+library(rangerts)
 context("ranger_splitweights")
 
 ## Tests
@@ -13,14 +13,14 @@ test_that("Tree-wise split select weights work", {
   num.trees <- 5
   weights <- replicate(num.trees, runif(ncol(iris)-1), simplify = FALSE)
   expect_silent(ranger(Species ~ ., iris, num.trees = num.trees, split.select.weights = weights))
-  
+
   weights <- replicate(num.trees+1, runif(ncol(iris)-1), simplify = FALSE)
   expect_error(ranger(Species ~ ., iris, num.trees = num.trees, split.select.weights = weights))
 })
 
 test_that("always split variables work", {
-  expect_silent(ranger(Species ~ ., iris, num.trees = 10, 
+  expect_silent(ranger(Species ~ ., iris, num.trees = 10,
                        always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
-  expect_silent(ranger(dependent.variable.name = "Species", data = iris, num.trees = 10, 
+  expect_silent(ranger(dependent.variable.name = "Species", data = iris, num.trees = 10,
                        always.split.variables = c("Petal.Length", "Petal.Width"), mtry = 2))
 })

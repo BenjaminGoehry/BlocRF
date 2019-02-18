@@ -1,7 +1,7 @@
-library(ranger)
+library(rangerts)
 context("ranger_quantreg")
 
-rf.quant <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE, 
+rf.quant <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = TRUE,
                    keep.inbag = TRUE, num.trees = 50)
 pred.quant <- predict(rf.quant, mtcars[27:32, ], type = "quantiles")
 
@@ -36,12 +36,12 @@ test_that("Working for constant variables", {
 
 test_that("Error message if no regression forest", {
   rf <- ranger(Species ~ ., iris, num.trees = 5)
-  expect_error(predict(rf, iris, type = "quantiles"), 
+  expect_error(predict(rf, iris, type = "quantiles"),
                "Error\\: Quantile prediction implemented only for regression outcomes\\.")
 })
 
 test_that("Error message if not grown with quantreg=TRUE", {
   rf <- ranger(mpg ~ ., mtcars[1:26, ], quantreg = FALSE, num.trees = 50)
-  expect_error(predict(rf, mtcars[27:32, ], type = "quantiles"), 
+  expect_error(predict(rf, mtcars[27:32, ], type = "quantiles"),
                "Error\\: Set quantreg\\=TRUE in ranger\\(\\.\\.\\.\\) for quantile prediction\\.")
 })

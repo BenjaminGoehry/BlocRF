@@ -20,7 +20,7 @@
 #include "Forest.h"
 #include "TreeProbability.h"
 
-namespace ranger {
+namespace rangerts {
 
 class ForestProbability: public Forest {
 public:

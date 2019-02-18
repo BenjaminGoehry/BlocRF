@@ -18,7 +18,7 @@
 #include "globals.h"
 #include "Forest.h"
 
-namespace ranger {
+namespace rangerts {
 
 class ForestRegression: public Forest {
 public:

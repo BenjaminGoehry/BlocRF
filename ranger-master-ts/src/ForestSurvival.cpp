@@ -19,7 +19,7 @@
 #include "ForestSurvival.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 void ForestSurvival::loadForest(size_t dependent_varID, size_t num_trees,
     std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,

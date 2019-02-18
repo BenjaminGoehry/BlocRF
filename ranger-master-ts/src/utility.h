@@ -19,10 +19,10 @@
 #include <random>
 #include <unordered_set>
 #include <unordered_map>
-#include <cstddef> 
-#include <memory> 
-#include <type_traits> 
-#include <utility> 
+#include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 #ifdef R_BUILD
 #include <Rinternals.h>
@@ -31,7 +31,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 /**
  * Split sequence start..end in num_parts parts with sizes as equal as possible.

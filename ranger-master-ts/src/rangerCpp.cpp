@@ -44,7 +44,7 @@
 #include "DataSparse.h"
 #include "utility.h"
 
-using namespace ranger;
+using namespace rangerts;
 
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
@@ -58,7 +58,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     bool use_unordered_variable_names, bool save_memory, uint splitrule_r, std::vector<double>& case_weights,
     bool use_case_weights, std::vector<double>& class_weights, bool predict_all, bool keep_inbag,
     std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
-    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_data, bool use_sparse_data, bool order_snps, 
+    uint num_random_splits, Eigen::SparseMatrix<double>& sparse_data, bool use_sparse_data, bool order_snps,
     bool oob_error, uint max_depth, std::vector<std::vector<size_t>>& inbag, bool use_inbag,
     bool activate_ts, uint block_size, uint bootstrap_ts_r) {
 
@@ -102,7 +102,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       num_cols = input_data.ncol();
     }
 
-    // Initialize data 
+    // Initialize data
     if (use_sparse_data) {
       data = make_unique<DataSparse>(sparse_data, variable_names, num_rows, num_cols);
     } else {
@@ -149,7 +149,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
     forest->initR(dependent_variable_name, std::move(data), mtry, num_trees, verbose_out, seed, num_threads,
         importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
         prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights,
-        inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits, 
+        inbag, predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits,
         order_snps, max_depth, activate_ts, block_size, bootstrap_ts);
 
     // Load forest object if in prediction mode
@@ -252,7 +252,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
         std::vector<std::vector<size_t>> snp_order = forest->getSnpOrder();
         forest_object.push_back(std::vector<std::vector<size_t>>(snp_order.begin(), snp_order.begin() + snp_data.ncol()), "snp.order");
       }
-      
+
       if (treetype == TREE_CLASSIFICATION) {
         auto& temp = dynamic_cast<ForestClassification&>(*forest);
         forest_object.push_back(temp.getClassValues(), "class.values");
@@ -268,7 +268,7 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name, Rcpp::N
       }
       result.push_back(forest_object, "forest");
     }
-    
+
     if (!verbose) {
       delete verbose_out;
     }

@@ -19,7 +19,7 @@
 #include "utility.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 TreeClassification::TreeClassification(std::vector<double>* class_values, std::vector<uint>* response_classIDs,
     std::vector<std::vector<size_t>>* sampleIDs_per_class, std::vector<double>* class_weights) :

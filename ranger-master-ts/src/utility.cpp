@@ -25,7 +25,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 void equalSplit(std::vector<uint>& result, uint start, uint end, uint num_parts) {
 

@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class Tree {
 public:
@@ -94,7 +94,7 @@ protected:
 
   void bootstrapWeighted();
   void bootstrapWithoutReplacementWeighted();
-  
+
   void bootstrapMovingBlock();
   void bootstrapStationaryBlock();
   void bootstrapCircularBlock();
@@ -183,7 +183,7 @@ protected:
   uint max_depth;
   uint depth;
   size_t last_left_nodeID;
-  
+
   //Bootstrap time series
   bool activate_ts;
   uint block_size;

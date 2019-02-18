@@ -20,7 +20,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class DataChar: public Data {
 public:
@@ -65,7 +65,7 @@ private:
   std::vector<char> data;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* DATACHAR_H_ */
 // #nocov end

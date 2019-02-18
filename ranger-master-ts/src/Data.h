@@ -6,7 +6,7 @@
  This software may be modified and distributed under the terms of the MIT license.
 
  Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #ifndef DATA_H_
@@ -20,7 +20,7 @@
 
 #include "globals.h"
 
-namespace ranger {
+namespace rangerts {
 
 class Data {
 public:
@@ -230,6 +230,6 @@ protected:
   bool order_snps;
 };
 
-} // namespace ranger
+} // namespace rangerts
 
 #endif /* DATA_H_ */

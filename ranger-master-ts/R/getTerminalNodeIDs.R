@@ -26,18 +26,18 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' This function is deprecated. 
+##' This function is deprecated.
 ##' Please use predict() with \code{type = "terminalNodes"} instead.
-##' This function calls predict() now. 
+##' This function calls predict() now.
 ##'
 ##' @title Get terminal node IDs (deprecated)
 ##' @param rf \code{ranger} object.
-##' @param dat New dataset. Terminal node IDs for this dataset are obtained. 
+##' @param dat New dataset. Terminal node IDs for this dataset are obtained.
 ##'
 ##' @return Matrix with terminal nodeIDs for all observations in dataset and trees.
 ##'
 ##' @examples
-##' library(ranger)
+##' library(rangerts)
 ##' rf <- ranger(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
 ##' getTerminalNodeIDs(rf, iris)
 ##' @export

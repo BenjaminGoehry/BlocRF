@@ -6,7 +6,7 @@
  This software may be modified and distributed under the terms of the MIT license.
 
  Please note that the C++ core of ranger is distributed under MIT license and the
- R package "ranger" under GPL3 license.
+ R package "rangerts" under GPL3 license.
  #-------------------------------------------------------------------------------*/
 
 #include <fstream>
@@ -18,7 +18,7 @@
 #include "Data.h"
 #include "utility.h"
 
-namespace ranger {
+namespace rangerts {
 
 Data::Data() :
     num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
@@ -271,5 +271,5 @@ void Data::orderSnpLevels(std::string dependent_variable_name, bool corrected_im
   order_snps = true;
 }
 
-} // namespace ranger
+} // namespace rangerts
 

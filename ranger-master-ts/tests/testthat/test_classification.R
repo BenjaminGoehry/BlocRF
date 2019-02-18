@@ -1,6 +1,6 @@
 ## Tests for random forests for classification
 
-library(ranger)
+library(rangerts)
 context("ranger_class")
 
 ## Initialize the random forest for classification
@@ -18,7 +18,7 @@ test_that("classification result is of class ranger with 14 elements", {
 test_that("classification prediction returns factor", {
   expect_is(rg.class$predictions, "factor")
   expect_null(dim(rg.class$predictions))
-  
+
   pred <- predict(rg.class, iris)
   expect_is(pred$predictions, "factor")
   expect_null(dim(pred$predictions))
@@ -55,7 +55,7 @@ test_that("predict.all for classification returns numeric matrix of size trees x
   rf <- ranger(Species ~ ., iris, num.trees = 5, write.forest = TRUE)
   pred <- predict(rf, iris, predict.all = TRUE)
   expect_is(pred$predictions, "matrix")
-  expect_equal(dim(pred$predictions), 
+  expect_equal(dim(pred$predictions),
               c(nrow(iris), rf$num.trees))
 })
 
@@ -79,12 +79,12 @@ test_that("Majority vote of predict.all for classification is equal to forest pr
 
 test_that("Alternative interface classification prediction works if only independent variable given, one independent variable", {
   n <- 50
-  
+
   dt <- data.frame(x = runif(n), y = factor(rbinom(n, 1, 0.5)))
   rf <- ranger(dependent.variable.name = "y", data = dt, num.trees = 5, write.forest = TRUE)
   expect_silent(predict(rf, dt))
   expect_silent(predict(rf, dt[, 1, drop = FALSE]))
-  
+
   dt2 <- data.frame(y = factor(rbinom(n, 1, 0.5)), x = runif(n))
   rf <- ranger(dependent.variable.name = "y", data = dt2, num.trees = 5, write.forest = TRUE)
   expect_silent(predict(rf, dt2))
@@ -93,12 +93,12 @@ test_that("Alternative interface classification prediction works if only indepen
 
 test_that("Alternative interface classification prediction works if only independent variable given, two independent variables", {
   n <- 50
-  
+
   dt <- data.frame(x1 = runif(n), x2 = runif(n), y = factor(rbinom(n, 1, 0.5)))
   rf <- ranger(dependent.variable.name = "y", data = dt, num.trees = 5, write.forest = TRUE)
   expect_silent(predict(rf, dt))
   expect_silent(predict(rf, dt[, 1:2]))
-  
+
   dt2 <- data.frame(y = factor(rbinom(n, 1, 0.5)), x1 = runif(n), x2 = runif(n))
   rf <- ranger(dependent.variable.name = "y", data = dt2, num.trees = 5, write.forest = TRUE)
   expect_silent(predict(rf, dt2))
@@ -112,7 +112,7 @@ test_that("predict works for single observations, classification", {
 })
 
 test_that("confusion matrix is of right dimension", {
-  expect_equal(dim(rg.class$confusion.matrix), 
+  expect_equal(dim(rg.class$confusion.matrix),
                rep(nlevels(iris$Species), 2))
 })
 
@@ -122,24 +122,24 @@ test_that("confusion matrix has right dimnames", {
 })
 
 test_that("confusion matrix rows are the true classes", {
-  expect_equal(as.numeric(rowSums(rg.class$confusion.matrix)), 
+  expect_equal(as.numeric(rowSums(rg.class$confusion.matrix)),
                as.numeric(table(iris$Species)))
 })
 
 test_that("confusion matrix rows are the true classes if using case weights", {
-  rf <- ranger(Species ~ ., data = iris, num.trees = 5, 
+  rf <- ranger(Species ~ ., data = iris, num.trees = 5,
                case.weights = c(rep(100, 5), rep(5, 145)))
-  expect_equal(as.numeric(rowSums(rf$confusion.matrix)), 
+  expect_equal(as.numeric(rowSums(rf$confusion.matrix)),
                as.numeric(table(iris$Species)))
 })
 ## Splitrule
 test_that("default splitrule is Gini for classification", {
   set.seed(42)
   rf1 <- ranger(Species ~ ., iris, num.trees = 5)
-  
+
   set.seed(42)
   rf2 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "gini")
-  
+
   expect_equal(rf1$splitrule, "gini")
   expect_equal(rf2$splitrule, "gini")
   expect_equal(rf1$prediction.error, rf2$prediction.error)
@@ -148,10 +148,10 @@ test_that("default splitrule is Gini for classification", {
 test_that("default splitrule is Gini for probability", {
   set.seed(42)
   rf1 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE)
-  
+
   set.seed(42)
   rf2 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE, splitrule = "gini")
-  
+
   expect_equal(rf1$splitrule, "gini")
   expect_equal(rf2$splitrule, "gini")
   expect_equal(rf1$prediction.error, rf2$prediction.error)
@@ -160,10 +160,10 @@ test_that("default splitrule is Gini for probability", {
 test_that("splitrule extratrees is different from Gini for classification", {
   set.seed(42)
   rf1 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "extratrees")
-  
+
   set.seed(42)
   rf2 <- ranger(Species ~ ., iris, num.trees = 5, splitrule = "gini")
-  
+
   expect_equal(rf1$splitrule, "extratrees")
   expect_equal(rf2$splitrule, "gini")
   expect_false(rf1$prediction.error == rf2$prediction.error)
@@ -172,18 +172,18 @@ test_that("splitrule extratrees is different from Gini for classification", {
 test_that("splitrule extratrees is different from Gini for probability", {
   set.seed(42)
   rf1 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE, splitrule = "extratrees")
-  
+
   set.seed(42)
   rf2 <- ranger(Species ~ ., iris, num.trees = 5, probability = TRUE, splitrule = "gini")
-  
+
   expect_equal(rf1$splitrule, "extratrees")
   expect_equal(rf2$splitrule, "gini")
   expect_false(rf1$prediction.error == rf2$prediction.error)
 })
 
 test_that("Working with numerically almost exact splitting values", {
-  dat <- data.frame(a = factor(1:2), 
-                    z = c(1.7629414498915687570246291215880773, 
+  dat <- data.frame(a = factor(1:2),
+                    z = c(1.7629414498915687570246291215880773,
                           1.7629414498915689790692340466193854))
   expect_silent(ranger(a ~ ., data = dat, num.threads = 1, num.trees = 1))
 })

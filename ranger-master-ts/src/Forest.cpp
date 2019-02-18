@@ -26,16 +26,16 @@
 #include "DataDouble.h"
 #include "DataFloat.h"
 
-namespace ranger {
+namespace rangerts {
 
 Forest::Forest() :
     verbose_out(0), num_trees(DEFAULT_NUM_TREE), mtry(0), min_node_size(0), num_variables(0), num_independent_variables(
         0), seed(0), dependent_varID(0), num_samples(0), prediction_mode(false), memory_mode(MEM_DOUBLE), sample_with_replacement(
         true), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction(
         { 1 }), holdout(false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(
-        DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), 
-        data { }, overall_prediction_error(NAN), 
-        activate_ts(false), block_size(DEFAULT_BLOCK_SIZE), bootstrap_ts(DEFAULT_BOOTSTRAPTS), 
+        DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS),
+        data { }, overall_prediction_error(NAN),
+        activate_ts(false), block_size(DEFAULT_BLOCK_SIZE), bootstrap_ts(DEFAULT_BOOTSTRAPTS),
         importance_mode(DEFAULT_IMPORTANCE_MODE), progress(0) {
 }
 
@@ -72,7 +72,7 @@ void Forest::initCpp(std::string dependent_variable_name, MemoryMode memory_mode
     std::string status_variable_name, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, uint max_depth, bool activate_ts, 
+    PredictionType prediction_type, uint num_random_splits, uint max_depth, bool activate_ts,
     uint block_size, BootstrapTS bootstrap_ts) {
 
   this->verbose_out = verbose_out;
@@ -1013,4 +1013,4 @@ void Forest::showProgress(std::string operation, size_t max_progress) {
 }
 #endif
 
-} // namespace ranger
+} // namespace rangerts

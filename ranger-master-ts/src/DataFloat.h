@@ -19,7 +19,7 @@
 #include "globals.h"
 #include "Data.h"
 
-namespace ranger {
+namespace rangerts {
 
 class DataFloat: public Data {
 public:
