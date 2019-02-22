@@ -564,7 +564,6 @@ void Tree::bootstrapMovingBlock() {
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size);
 
   // Start with all samples OOB
-  // TODO need to add parameter to Tree class : bool activate_ts, and block_size
   size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
 
@@ -650,7 +649,6 @@ void Tree::bootstrapCircularBlock() {
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
 
   // Start with all samples OOB
-  // TODO need to add parameter to Tree class : bool activate_ts, and int (size_t) block_size
   size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
 
@@ -691,24 +689,47 @@ void Tree::bootstrapNonOverlappingBlock() {
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
   // Start with all samples OOB
-  // TODO need to add parameter to Tree class : bool activate_ts, and int (size_t) block_size
   size_t k = ceil(num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
 
-  std::uniform_int_distribution<size_t> unif_dist(0, k - 1);
+  if (sample_with_replacement) {
+    std::uniform_int_distribution<size_t> unif_dist(0, k - 1);
 
-  // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= (k+1); ++s) {
-    size_t draw = unif_dist(random_number_generator);
-    // loop to take the selected block
-    for (size_t i = 0; i < block_size; ++i) {
-      size_t ind = (size_t) draw * block_size + i;
-      if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
-        sampleIDs.push_back(ind);
-        ++inbag_counts[ind];
+    // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+    for (size_t s = 0; s <= k; ++s) {
+      size_t draw = unif_dist(random_number_generator);
+
+      // loop to take the selected block
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = (size_t) draw * block_size + i;
+        if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+          sampleIDs.push_back(ind);
+          ++inbag_counts[ind];
+        }
+      }
+    }
+  } else {
+    size_t num_block = ceil(num_samples_inbag / block_size);
+    // initialise block index vector, fill it from 0 to num_block - 1
+    std::vector<size_t> index_nonoverlap(num_block);
+    std::iota(index_nonoverlap.begin(), index_nonoverlap.end(), 0);
+
+    // shuffle the block index
+    std::shuffle(index_nonoverlap.begin(), index_nonoverlap.end(), random_number_generator);
+    index_nonoverlap.resize(k);
+
+    // fill the sampleIDs and inbag_counts
+    for (auto & s : index_nonoverlap) {
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = (size_t) s * block_size + i;
+        if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+          sampleIDs.push_back(ind);
+          ++inbag_counts[ind];
+        }
       }
     }
   }
+
 
   // Save OOB samples
   for (size_t s = 0; s < inbag_counts.size(); ++s) {
