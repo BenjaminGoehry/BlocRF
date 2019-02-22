@@ -22,15 +22,17 @@ We added 3 parameters in the ranger function: activate.ts, block.size, bootstrap
 * block.size: the number of observations in one block, by default = 10.    
 * bootstrap.ts: string parameter in **nonoverlapping**, **moving**, **stationary**, **circular**, by default = nonoverlapping, simply because it's longer to tape. Some research works have demonstrated that moving or stationary might be more beneficial.
     
+All these parameters are to be used with caution together with the parameters already included in the *ranger* original function.
 ### Build test
 To verify we didn't break anything. :relieved:    
     
 ![Travis Build Status](https://travis-ci.org/hyanworkspace/rangerts.svg?branch=master)
+*This is functional if project is public and need an account of travis-ci.org*
 
 ## Installation
 To install the development version from GitHub using `devtools`, run
 ```R
-devtools::install_github("hyanworkspace/rangerts", quiet = T)
+devtools::install_github("BenjaminGoehry/BlocRF/rangerts", quiet = T)
 ```
 ## Examples
 ```R
@@ -41,5 +43,5 @@ library(rangerts)
 # not run
 # rangerts::ranger(data, activate.ts = T, block.size = 10, bootstrap.ts = "moving")
 
-# functional with caret ?
+# might be functional with caret, need to be checkek, -> how to use directly the bootstrapping function then pass the sample to ranger original function
 ```
