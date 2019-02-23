@@ -45,4 +45,135 @@ library(rangerts)
 
 # might be functional with caret -> need implementation or merge with ranger
 # Another question -> how to use directly the bootstrapping function then pass the sample to ranger original function
+
+
+# load consumption data in the package
+df <- rangerts::data
+
+# set general parameters
+nb_trees <- 1000
+mtry <- floor(sqrt(ncol(df)))
+block_size <- 52
+# Use case 1
+# the default ranger with bootstrap i.i.d and with replacement
+# thus the sample fraction is the default value = 1
+rf_iid_rep <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T,
+                 seed = 1, # for reproductibility
+                 activate.ts = F,
+                 keep.inbag = T) # to keep trace of in-bag samples
+# 679 observations in total
+nrow(df)
+# the average number of observations are at least taken in-bag once in the trees
+purrr::map_int(rf_iid_rep$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 429.52
+
+# Use case 2
+# the default ranger with bootstrap i.i.d and with replacement
+# thus the sample fraction = 0.632
+rf_iid <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = F,
+                 seed = 1,
+                 activate.ts = F,
+                 keep.inbag = T)
+# the average number of observations are at least taken in-bag once in the trees
+purrr::map_int(rf_iid$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 429
+
+# Use case 3
+# the nonoverlapping mode with replacement
+# thus the sample fraction is the default value = 1
+rf_no_rep <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1, 
+                 activate.ts = T,
+                 block.size = block_size,
+                 bootstrap.ts = "nonoverlapping",
+                 keep.inbag = T)
+purrr::map_int(rf_no_rep$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 439.266
+
+# Use case 4
+# TODO BUGGGGGGGG !!!!!!!!!!
+# check shuffle
+# the nonoverlapping mode with replacement
+# thus the sample fraction is the default value = 1
+rf_no <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = F, # in this case, every sample in-bag is taken only once
+                 # seed = 1, 
+                 activate.ts = T,
+                 block.size = block_size,
+                 bootstrap.ts = "nonoverlapping",
+                 keep.inbag = T)
+purrr::map_int(rf_no$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 416
+
+
+# Use case 5
+# the moving mode with replacement
+# thus the sample fraction is the default value = 1
+rf_mv <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1, 
+                 activate.ts = T,
+                 block.size = block_size,
+                 bootstrap.ts = "moving",
+                 keep.inbag = T)
+purrr::map_int(rf_mv$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 430.157
+
+
+# Use case 6
+# the stationary mode with replacement
+# thus the sample fraction is the default value = 1
+rf_st <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1, 
+                 activate.ts = T,
+                 block.size = block_size,
+                 bootstrap.ts = "stationary",
+                 keep.inbag = T)
+purrr::map_int(rf_st$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 446.788
+
+# Use case 7
+# the circular mode with replacement
+# thus the sample fraction is the default value = 1
+rf_cr <- rangerts::ranger(Load ~ ., data = df,
+                 num.trees = nb_trees,
+                 mtry = mtry,
+                 replace = T, # default = T too
+                 seed = 1, 
+                 activate.ts = T,
+                 block.size = block_size,
+                 bootstrap.ts = "circular",
+                 keep.inbag = T)
+purrr::map_int(rf_cr$inbag.counts, 
+               ~ length(which(.x != 0))) %>%
+  mean()
+# 438.124
 ```
