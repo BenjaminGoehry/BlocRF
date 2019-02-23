@@ -43,5 +43,6 @@ library(rangerts)
 # not run
 # rangerts::ranger(data, activate.ts = T, block.size = 10, bootstrap.ts = "moving")
 
-# might be functional with caret, need to be checkek, -> how to use directly the bootstrapping function then pass the sample to ranger original function
+# might be functional with caret -> need implementation or merge with ranger
+# Another question -> how to use directly the bootstrapping function then pass the sample to ranger original function
 ```
