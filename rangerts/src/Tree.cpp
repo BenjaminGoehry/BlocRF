@@ -690,10 +690,11 @@ void Tree::bootstrapNonOverlappingBlock() {
 
   // Start with all samples OOB
   size_t k = ceil(num_samples_inbag / block_size);
+  size_t num_block = ceil(num_samples / block_size);
   inbag_counts.resize(num_samples, 0);
 
   if (sample_with_replacement) {
-    std::uniform_int_distribution<size_t> unif_dist(0, k - 1);
+    std::uniform_int_distribution<size_t> unif_dist(0, num_block - 1);
 
     // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
     for (size_t s = 0; s <= k; ++s) {
@@ -709,14 +710,14 @@ void Tree::bootstrapNonOverlappingBlock() {
       }
     }
   } else {
-    size_t num_block = ceil(num_samples_inbag / block_size);
     // initialise block index vector, fill it from 0 to num_block - 1
     std::vector<size_t> index_nonoverlap(num_block);
     std::iota(index_nonoverlap.begin(), index_nonoverlap.end(), 0);
 
     // shuffle the block index
     std::shuffle(index_nonoverlap.begin(), index_nonoverlap.end(), random_number_generator);
-    index_nonoverlap.resize(k);
+    index_nonoverlap.resize(k + 1);
+    index_nonoverlap.shrink_to_fit();
 
     // fill the sampleIDs and inbag_counts
     for (auto & s : index_nonoverlap) {

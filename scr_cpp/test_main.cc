@@ -12,16 +12,17 @@ using namespace std;
 
 int main() {
   // general parameters
-  int num_samples = 20;
-  double sample_fraction = 0.8;
-  int block_size = 4;
+  int num_samples = 200;
+  double sample_fraction = 0.133;
+  int block_size = 10;
   uint seed = 2;
+  bool sample_rep = false;
 
   // initialise necessary variables
   std::vector<size_t> oob_sampleIDs;
   std::vector<size_t> inbag_counts;
 
-  std::vector<size_t> sampleIDs = bootstrap_non_overlapping_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
+  std::vector<size_t> sampleIDs = bootstrap_non_overlapping_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep);
   //std::vector<size_t> sampleIDs = bootstrap_circular_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //std::vector<size_t> sampleIDs = bootstrap_stationary_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //std::vector<size_t> sampleIDs = bootstrap_moving_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);

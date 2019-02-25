@@ -4,17 +4,24 @@ Title: A Fast Implementation of Random Forests with block bootstrapping for time
 Version: 0.0.1
 Date: 2019-02-14
 Author: Marvin N. Wright [aut, cre], Stefan Wager [ctb], Philipp Probst [ctb], Hui YAN[ctb], Benjamin Goehry[ctb]
-Maintainer: Marvin N. Wright <cran@wrig.de>, Hui YAN <workspace.yan@gmail.com>
+Maintainer: Marvin N. Wright <cran@wrig.de>
 Description: The original package of ranger and block bootstrapping for time series.
 License: GPL-3
-Imports: Rcpp (>= 0.11.2), Matrix
+Imports: 
+    Rcpp (>= 0.11.2),
+    Matrix,
+    magrittr
 LinkingTo: Rcpp, RcppEigen
 Depends: R (>= 3.1)
 Suggests: 
     survival,
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    dplyr,
+    purrr,
+    yardstick
 RoxygenNote: 6.1.1
 Encoding: UTF-8
 VignetteBuilder: knitr
+LazyData: true
