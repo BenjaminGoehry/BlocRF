@@ -16,10 +16,13 @@ knitr::opts_chunk$set(
 )
 ```
 # Rangerts, a ranger package for time series
-{rangerts} is a modified version of the {ranger} package for random forest algorithm, adapted to time series. It implements several block bootstrapping methods during the tree growing phase.  
+**rangerts** is a modified version of the **ranger** package for random forest algorithm, adapted to time series. It implements several block bootstrapping methods during the tree growing phase.
+    
 ## The original package
-*ranger* (https://github.com/imbs-hl/ranger) is an open source R package on github, created and maintained by Marvin N. Wright, with a clear explanation in the article below :    
-* Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. https://doi.org/10.18637/jss.v077.i01.
+[ranger] (https://github.com/imbs-hl/ranger) is an open source R package on github, created and maintained by Marvin N. Wright, with a clear explanation in the article below :    
+     
+* Wright, M. N. & Ziegler, A. (2017). [ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17] (https://doi.org/10.18637/jss.v077.i01).
+     
     
 ## What does rangerts do
 In the *rangerts* package, we try to get out of the comfort zone of random forest applications. We try to predict a time serie, with exogenous variables.     
@@ -33,7 +36,7 @@ All functions are the same as the *ranger* package (even the main function name 
 We added 3 parameters in the ranger function: activate.ts, block.size, bootstrap.ts. All these parameters are to be used **with caution** together with the parameters already included in the *ranger* original function.   
     
 * activate.ts: boolean, by default = FALSE, the block bootstrap is disabled in order to maintain *ranger*'s standard behavior.     
-* block.size: the number of observations per block, by default = 10.    
+* block.size: the number of observations per block, by default = 10. In the **stationary** block bootstrapping mode, this parameter define the geometric law with $p = 1/block.size$.     
 * bootstrap.ts: string parameter, takes its value in **nonoverlapping**, **moving**, **stationary**, **circular**, by default = nonoverlapping, simply because it's longer to tape. Some research works have demonstrated that moving or stationary might be more beneficial.
     
 ## Installation
@@ -179,15 +182,13 @@ purrr::map_dbl(rf_no_rep$inbag.counts, sum) %>%
 # 679
 
 # Use case 4
-# TODO BUGGGGGGGG !!!!!!!!!!
-# check shuffle
 # the nonoverlapping mode with replacement
 # thus the sample fraction is the default value = 1
 rf_no <- rangerts::ranger(Load ~ ., data = df_train,
                  num.trees = nb_trees,
                  mtry = mtry,
                  replace = F, # in this case, every sample in-bag is taken only once
-                 # seed = 1, 
+                 seed = 1,
                  activate.ts = T,
                  block.size = block_size,
                  bootstrap.ts = "nonoverlapping",
@@ -197,11 +198,11 @@ rf_no <- rangerts::ranger(Load ~ ., data = df_train,
 purrr::map_int(rf_no$inbag.counts, 
                ~ length(which(.x != 0))) %>%
   mean()
-# 416
+# 429
 # total number of inbag samples
 purrr::map_dbl(rf_no$inbag.counts, sum) %>%
   mean()
-# 416
+# 429
 
 
 # Use case 5
@@ -271,13 +272,24 @@ model_list <- list(rf_iid, rf_iid_rep,
                    rf_mv, rf_st, rf_cr)
 
 # compare rmse & mape
+algo_spec <- c("iid without replacement", 
+               "iid with replacement",
+               "nonoverlapping without replacement",
+               "nonoverlapping with replacement",
+               "moving with replacement",
+               "stationary with replacement",
+               "circular with replacement"
+               )
 rmse <- purrr::map_dbl(model_list, 
                ~ yardstick::rmse_vec(df_test$Load, 
                                    predict(.x, df_test)$predictions))
-rmse
+cbind(algo_spec, round(rmse, 2))
 
 mape <- purrr::map_dbl(model_list, 
                ~ yardstick::mape_vec(df_test$Load, 
                                    predict(.x, df_test)$predictions))
-mape
+cbind(algo_spec, round(mape, 2))
 ```
+
+
+More analysis could be done based on the in-bag samples once we set `keep.inbag = TRUE`.
