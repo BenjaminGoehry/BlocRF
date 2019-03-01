@@ -561,7 +561,9 @@ void Tree::bootstrapMovingBlock() {
   sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
-  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size);
+	//TODO  ajout paramètre d (périodicité)
+  //sample( c(1:(n-l+1)),1) - > sample( seq(c(1:(n-l+1)),d), 1)
+  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size); 
 
   // Start with all samples OOB
   size_t k = ceil(num_samples_inbag / block_size);
