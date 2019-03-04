@@ -22,7 +22,7 @@ Tree::Tree() :
         false), data(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(
         true), sample_fraction(0), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(
         DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(
-        0), activate_ts(false), block_size(DEFAULT_BLOCK_SIZE), bootstrap_ts(DEFAULT_BOOTSTRAPTS) {
+        0), activate_ts(false), block_size(DEFAULT_BLOCK_SIZE), bootstrap_ts(DEFAULT_BOOTSTRAPTS), period(DEFAULT_PERIOD) {
 }
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
@@ -33,7 +33,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
         0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(0), memory_saving_splitting(
         false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(
         DEFAULT_NUM_RANDOM_SPLITS), max_depth(DEFAULT_MAXDEPTH), depth(0), last_left_nodeID(0),
-        activate_ts(false), block_size(DEFAULT_BLOCK_SIZE), bootstrap_ts(DEFAULT_BOOTSTRAPTS) {
+        activate_ts(false), block_size(DEFAULT_BLOCK_SIZE), bootstrap_ts(DEFAULT_BOOTSTRAPTS), period(DEFAULT_PERIOD) {
 }
 
 void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
@@ -42,7 +42,7 @@ void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     std::vector<size_t>* manual_inbag, bool keep_inbag, std::vector<double>* sample_fraction, double alpha,
     double minprop, bool holdout, uint num_random_splits, uint max_depth,
-    bool activate_ts, uint block_size, BootstrapTS bootstrap_ts) {
+    bool activate_ts, uint block_size, BootstrapTS bootstrap_ts, uint period) {
 
   this->data = data;
   this->mtry = mtry;
@@ -78,6 +78,7 @@ void Tree::init(const Data* data, uint mtry, size_t dependent_varID, size_t num_
   this->activate_ts = activate_ts;
   this->block_size = block_size;
   this->bootstrap_ts = bootstrap_ts;
+  this->period = period;
 }
 
 void Tree::grow(std::vector<double>* variable_importance) {
@@ -92,6 +93,7 @@ void Tree::grow(std::vector<double>* variable_importance) {
     if(bootstrap_ts == STATIONARY) bootstrapStationaryBlock();
     if(bootstrap_ts == CIRCULAR) bootstrapCircularBlock();
     if(bootstrap_ts == NONOVERLAPPING) bootstrapNonOverlappingBlock();
+    if(bootstrap_ts == SEASONAL) bootstrapSeasonalBlock();
   } else {
     if (!case_weights->empty()) {
       if (sample_with_replacement) {
@@ -563,14 +565,14 @@ void Tree::bootstrapMovingBlock() {
 
 	//TODO  ajout paramètre d (périodicité)
   //sample( c(1:(n-l+1)),1) - > sample( seq(c(1:(n-l+1)),d), 1)
-  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size); 
+  std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size);
 
   // Start with all samples OOB
-  size_t k = ceil(num_samples_inbag / block_size);
+  size_t k = (size_t) ceil((double) num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
 
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= k; ++s) {
+  for (size_t s = 0; s < k; ++s) {
     size_t draw = unif_dist(random_number_generator);
     // loop to take the selected block
     // stop when the inbag sample is full
@@ -578,6 +580,71 @@ void Tree::bootstrapMovingBlock() {
       if (sampleIDs.size() < num_samples_inbag) {
         sampleIDs.push_back(draw + i);
         ++inbag_counts[draw + i];
+      }
+    }
+  }
+
+  // Save OOB samples
+  for (size_t s = 0; s < inbag_counts.size(); ++s) {
+    if (inbag_counts[s] == 0) {
+      oob_sampleIDs.push_back(s);
+    }
+  }
+  num_samples_oob = oob_sampleIDs.size();
+
+  if (!keep_inbag) {
+    inbag_counts.clear();
+    inbag_counts.shrink_to_fit();
+  }
+}
+
+
+void Tree::bootstrapSeasonalBlock() {
+  // Use fraction (default 63.21%) of the samples
+    size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
+    size_t num_period = (size_t) ceil((double) num_samples / period);
+  // Reserve space, reserve a little more to be save)
+    std::vector<size_t> sampleIDs;
+    sampleIDs.reserve(num_samples_inbag);
+    oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
+
+  // Start with all samples OOB
+    size_t k = (size_t) ceil((double) num_samples_inbag / block_size);
+    inbag_counts.resize(num_samples, 0);
+
+
+  if (sample_with_replacement) {
+    std::uniform_int_distribution<size_t> unif_dist(0, num_period - 1);
+    // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
+      for (size_t s = 0; s < k; ++s) {
+        size_t draw = unif_dist(random_number_generator);
+        // loop to take the selected block
+        // stop when the inbag sample is full
+        for (size_t i = 0; i < block_size; ++i) {
+          size_t ind = draw * period + i;
+          if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+            sampleIDs.push_back(ind);
+            ++inbag_counts[ind];
+          }
+        }
+      }
+  } else {
+    // initialise block index vector, fill it from 0 to num_period - 1
+    std::vector<size_t> index_season(num_period);
+    std::iota(index_season.begin(), index_season.end(), 0);
+
+    // shuffle the block index
+    std::shuffle(index_season.begin(), index_season.end(), random_number_generator);
+    index_season.resize(k);
+    index_season.shrink_to_fit();
+
+    for (auto & s : index_season) {
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = (size_t) s * period + i;
+        if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+          sampleIDs.push_back(ind);
+          ++inbag_counts[ind];
+        }
       }
     }
   }
@@ -651,11 +718,11 @@ void Tree::bootstrapCircularBlock() {
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - 1);
 
   // Start with all samples OOB
-  size_t k = ceil(num_samples_inbag / block_size);
+  size_t k = (size_t) ceil((double) num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
 
   // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= k; ++s) {
+  for (size_t s = 0; s < k; ++s) {
     size_t draw = unif_dist(random_number_generator);
     // loop to take the selected block
     for (size_t i = 0; i < block_size; ++i) {
@@ -691,15 +758,15 @@ void Tree::bootstrapNonOverlappingBlock() {
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
   // Start with all samples OOB
-  size_t k = ceil(num_samples_inbag / block_size);
-  size_t num_block = ceil(num_samples / block_size);
+  size_t k = (size_t) ceil((double) num_samples_inbag / block_size);
+  size_t num_block = (size_t) ceil((double) num_samples / block_size);
   inbag_counts.resize(num_samples, 0);
 
   if (sample_with_replacement) {
     std::uniform_int_distribution<size_t> unif_dist(0, num_block - 1);
 
     // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-    for (size_t s = 0; s <= k; ++s) {
+    for (size_t s = 0; s < k; ++s) {
       size_t draw = unif_dist(random_number_generator);
 
       // loop to take the selected block
@@ -718,7 +785,7 @@ void Tree::bootstrapNonOverlappingBlock() {
 
     // shuffle the block index
     std::shuffle(index_nonoverlap.begin(), index_nonoverlap.end(), random_number_generator);
-    index_nonoverlap.resize(k + 1);
+    index_nonoverlap.resize(k);
     index_nonoverlap.shrink_to_fit();
 
     // fill the sampleIDs and inbag_counts
@@ -732,7 +799,6 @@ void Tree::bootstrapNonOverlappingBlock() {
       }
     }
   }
-
 
   // Save OOB samples
   for (size_t s = 0; s < inbag_counts.size(); ++s) {

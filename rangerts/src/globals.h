@@ -73,7 +73,8 @@ enum BootstrapTS {
   NONOVERLAPPING = 1,
   MOVING = 2,
   STATIONARY = 3,
-  CIRCULAR = 4
+  CIRCULAR = 4,
+  SEASONAL = 5
 };
 // Prediction type
 enum PredictionType {
@@ -95,6 +96,7 @@ const SplitRule DEFAULT_SPLITRULE = LOGRANK;
 const double DEFAULT_ALPHA = 0.5;
 const double DEFAULT_MINPROP = 0.1;
 const uint DEFAULT_BLOCK_SIZE = 10;
+const uint DEFAULT_PERIOD = 1;
 const BootstrapTS DEFAULT_BOOTSTRAPTS = NONOVERLAPPING;
 
 const uint DEFAULT_MAXDEPTH = 0;

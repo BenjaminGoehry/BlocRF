@@ -98,7 +98,8 @@
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param activate.ts Block bootstrapping activation.
 ##' @param block.size If block bootstrapping activated, number of blocks.
-##' @param bootstrap.ts Block bootstrapping mode : "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks.
+##' @param bootstrap.ts Block bootstrapping mode : "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks, and "seasonal" for seasonal blocks.
+##' @param period The number of steps of one period.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.
@@ -216,7 +217,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    verbose = TRUE, seed = NULL,
                    dependent.variable.name = NULL, status.variable.name = NULL,
                    classification = NULL, activate.ts = FALSE, block.size = 10,
-                   bootstrap.ts = "nonoverlapping") {
+                   bootstrap.ts = "nonoverlapping", period = 1) {
 
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -616,6 +617,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
       bootstrap.ts.num <- 3
     } else if (bootstrap.ts == "circular") {
       bootstrap.ts.num <- 4
+    } else if (bootstrap.ts == "seasonal") {
+      bootstrap.ts.num <- 5
     } else {
       stop("Error: Unknown block bootstrap type.")
     }
@@ -778,7 +781,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type,
                       num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth,
-                      inbag, use.inbag, activate.ts, block.size, bootstrap.ts.num)
+                      inbag, use.inbag, activate.ts, block.size, bootstrap.ts.num, period)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -909,4 +912,3 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
   return(result)
 }
-

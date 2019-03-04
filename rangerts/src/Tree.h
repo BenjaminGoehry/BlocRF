@@ -41,7 +41,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, bool activate_ts, uint block_size, BootstrapTS bootstrap_ts);
+      uint max_depth, bool activate_ts, uint block_size, BootstrapTS bootstrap_ts, uint period);
 
   virtual void allocateMemory() = 0;
 
@@ -99,6 +99,7 @@ protected:
   void bootstrapStationaryBlock();
   void bootstrapCircularBlock();
   void bootstrapNonOverlappingBlock();
+  void bootstrapSeasonalBlock();
 
   virtual void bootstrapClassWise();
   virtual void bootstrapWithoutReplacementClassWise();
@@ -188,6 +189,7 @@ protected:
   bool activate_ts;
   uint block_size;
   BootstrapTS bootstrap_ts;
+  uint period;
 };
 
 } // namespace ranger

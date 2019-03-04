@@ -13,11 +13,11 @@ std::vector<size_t>  bootstrap_circular_block(uint seed, int num_samples, double
 
 // Start with all samples OOB
 // TODO need to add parameter to Tree class : bool activate_ts, and int (size_t) block_size
-  size_t k = ceil(num_samples_inbag / block_size);
+  size_t k = (size_t) ceil((double) num_samples_inbag / block_size);
   inbag_counts.resize(num_samples, 0);
 
 // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
-  for (size_t s = 0; s <= k; ++s) {
+  for (size_t s = 0; s < k; ++s) {
     size_t draw = unif_dist(random_number_generator);
     // loop to take the selected block
     for (size_t i = 0; i < block_size; ++i) {
