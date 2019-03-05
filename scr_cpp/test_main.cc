@@ -12,10 +12,10 @@ using namespace std;
 
 int main() {
   // general parameters
-  int num_samples = 10;
-  double sample_fraction = 1.0;
-  int block_size = 7;
-  int seasonality = 5;
+  int num_samples = 679;
+  double sample_fraction = 0.632;
+  int block_size = 52;
+  int period = 50;
   uint seed = 101;
   bool sample_rep = false;
 
@@ -23,7 +23,7 @@ int main() {
   std::vector<size_t> oob_sampleIDs;
   std::vector<size_t> inbag_counts;
 
-  std::vector<size_t> sampleIDs = bootstrap_seasonal_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep, seasonality);
+  std::vector<size_t> sampleIDs = bootstrap_seasonal_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep, period);
   //std::vector<size_t> sampleIDs = bootstrap_non_overlapping_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep);
   //std::vector<size_t> sampleIDs = bootstrap_circular_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //std::vector<size_t> sampleIDs = bootstrap_stationary_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);

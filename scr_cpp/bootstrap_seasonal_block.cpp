@@ -53,14 +53,20 @@ if (sample_with_replacement) {
 
 
 // Save OOB samples
-/*
+
   for (size_t s = 0; s < inbag_counts.size(); ++s) {
     if (inbag_counts[s] == 0) {
       oob_sampleIDs.push_back(s);
     }
   }
-  num_samples_oob = oob_sampleIDs.size();
-*/
-  return(sampleIDs);
+  size_t num_samples_oob = oob_sampleIDs.size();
+  oob_sampleIDs.push_back(num_samples_oob);
+  oob_sampleIDs.push_back(inbag_counts.size());
+  num_samples_inbag = num_samples - num_samples_oob;
+  sampleIDs.resize(num_samples_inbag);
+  sampleIDs.shrink_to_fit();
+  oob_sampleIDs.push_back(sampleIDs.size());
+
+  return(oob_sampleIDs);
   //return(num_samples_inbag);
 }

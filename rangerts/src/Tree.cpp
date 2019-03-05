@@ -563,8 +563,6 @@ void Tree::bootstrapMovingBlock() {
   sampleIDs.reserve(num_samples_inbag);
   oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
-	//TODO  ajout paramètre d (périodicité)
-  //sample( c(1:(n-l+1)),1) - > sample( seq(c(1:(n-l+1)),d), 1)
   std::uniform_int_distribution<size_t> unif_dist(0, num_samples - block_size);
 
   // Start with all samples OOB
@@ -604,7 +602,6 @@ void Tree::bootstrapSeasonalBlock() {
     size_t num_samples_inbag = (size_t) num_samples * (*sample_fraction)[0];
     size_t num_period = (size_t) ceil((double) num_samples / period);
   // Reserve space, reserve a little more to be save)
-    std::vector<size_t> sampleIDs;
     sampleIDs.reserve(num_samples_inbag);
     oob_sampleIDs.reserve(num_samples * (exp(-(*sample_fraction)[0]) + 0.1));
 
@@ -612,9 +609,21 @@ void Tree::bootstrapSeasonalBlock() {
     size_t k = (size_t) ceil((double) num_samples_inbag / block_size);
     inbag_counts.resize(num_samples, 0);
 
-
   if (sample_with_replacement) {
     std::uniform_int_distribution<size_t> unif_dist(0, num_period - 1);
+    // or simply keep this to avoid num_samples_inbag incoherence pb
+    /*while (sampleIDs.size() < num_samples_inbag) {
+      size_t draw = unif_dist(random_number_generator);
+      // loop to take the selected block
+      // stop when the inbag sample is full
+      for (size_t i = 0; i < block_size; ++i) {
+        size_t ind = draw * period + i;
+        if (sampleIDs.size() < num_samples_inbag && ind < num_samples) {
+          sampleIDs.push_back(ind);
+          ++inbag_counts[ind];
+        }
+      }
+    }*/
     // Draw num_samples samples with replacement (num_samples_inbag out of n) as inbag and mark as not OOB
       for (size_t s = 0; s < k; ++s) {
         size_t draw = unif_dist(random_number_generator);
@@ -656,6 +665,9 @@ void Tree::bootstrapSeasonalBlock() {
     }
   }
   num_samples_oob = oob_sampleIDs.size();
+  num_samples_inbag = num_samples - num_samples_oob;
+  sampleIDs.resize(num_samples_inbag);
+  sampleIDs.shrink_to_fit();
 
   if (!keep_inbag) {
     inbag_counts.clear();
