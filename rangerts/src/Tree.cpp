@@ -420,8 +420,7 @@ void Tree::permuteAndPredictOobSamples(size_t permuted_varID) {
   std::vector<size_t> permutations(oob_sampleIDs);
   if (activate_ts) {
     // TODO check dependencies
-    std::vector<size_t> permutations(num_samples_oob);
-    permutations = permuteByBlock(oob_sampleIDs);
+    permuteByBlock(permutations);
   } else {
     std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
   }
@@ -867,8 +866,7 @@ void Tree::setManualInbag() {
   }
 }
 
-// TODO need more tests
-std::vector<size_t>& Tree::permuteByBlock(std::vector<size_t>& permutations) {
+void Tree::permuteByBlock(std::vector<size_t>& permutations) {
   std::vector<size_t> index_block(num_samples_oob);
   std::vector<size_t> permuted(num_samples_oob);
   index_block.push_back(0);
@@ -907,11 +905,8 @@ std::vector<size_t>& Tree::permuteByBlock(std::vector<size_t>& permutations) {
     }
   } else {
     std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
-    permuted = permutations;
   }
-  permuted.resize(num_samples_oob);
-  permuted.shrink_to_fit();
-  return permuted;
+  permutations = permuted;
 }
 
 } // namespace ranger

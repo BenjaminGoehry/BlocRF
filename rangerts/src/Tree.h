@@ -86,7 +86,7 @@ protected:
 
   size_t dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size_t permuted_sampleID);
   void permuteAndPredictOobSamples(size_t permuted_varID);
-  std::vector<size_t>& permuteByBlock(std::vector<size_t>& permutations);
+  void permuteByBlock(std::vector<size_t>& permutations);
   virtual double computePredictionAccuracyInternal() = 0;
 
   void bootstrap();
