@@ -219,7 +219,7 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
   prediction_terminal_nodeIDs.resize(num_samples_oob, 0);
 
 // Reserve space for permutations, initialize with oob_sampleIDs
-  std::vector<size_t> permutations(oob_sampleIDs);
+//  std::vector<size_t> permutations(oob_sampleIDs);
 
 // Randomly permute for all independent variables
   for (size_t i = 0; i < num_independent_variables; ++i) {
@@ -233,7 +233,8 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
     }
 
     // Permute and compute prediction accuracy again for this permutation and save difference
-    permuteAndPredictOobSamples(varID, permutations);
+    //permuteAndPredictOobSamples(varID, permutations);
+    permuteAndPredictOobSamples(varID);
     double accuracy_permuted = computePredictionAccuracyInternal();
     double accuracy_difference = accuracy_normal - accuracy_permuted;
     forest_importance[i] += accuracy_difference;
@@ -413,11 +414,17 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
   return nodeID;
 }
 
-void Tree::permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t>& permutations) {
+void Tree::permuteAndPredictOobSamples(size_t permuted_varID) {
 
 // Permute OOB sample
-//std::vector<size_t> permutations(oob_sampleIDs);
-  std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
+  std::vector<size_t> permutations(oob_sampleIDs);
+  if (activate_ts) {
+    // TODO check dependencies
+    std::vector<size_t> permutations(num_samples_oob);
+    permutations = permuteByBlock(oob_sampleIDs);
+  } else {
+    std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
+  }
 
 // For each sample, drop down the tree and add prediction
   for (size_t i = 0; i < num_samples_oob; ++i) {
@@ -858,6 +865,53 @@ void Tree::setManualInbag() {
     inbag_counts.clear();
     inbag_counts.shrink_to_fit();
   }
+}
+
+// TODO need more tests
+std::vector<size_t>& Tree::permuteByBlock(std::vector<size_t>& permutations) {
+  std::vector<size_t> index_block(num_samples_oob);
+  std::vector<size_t> permuted(num_samples_oob);
+  index_block.push_back(0);
+
+  if (num_samples_oob > 2) {
+    // build the index vector
+    // initialize the difference value
+    size_t count = 1;
+    for (size_t i = 0; i < (num_samples_oob - 1); ++i) {
+      size_t diff = permutations[i + 1] - permutations[i];
+      if (diff != 1 || count == block_size) {
+        index_block.push_back(i + 1);
+        count = 1;
+      } else {
+        ++count;
+      }
+    }
+    index_block.shrink_to_fit();
+    std::shuffle(index_block.begin(), index_block.end(), random_number_generator);
+    // build the permutations vector
+    size_t index_block_size = index_block.size();
+
+    for (size_t j = 0; j < index_block_size; ++j) {
+      size_t tmp = index_block[j];
+      permuted.push_back(permutations[tmp]);
+      while (tmp < (index_block[j] + block_size)) {
+        if ((tmp + 1) >= num_samples_oob) break;
+        size_t diff = permutations[tmp + 1] - permutations[tmp];
+        if (diff != 1) {
+          break;
+        }else{
+          permuted.push_back(permutations[tmp + 1]);
+        }
+        ++tmp;
+      }
+    }
+  } else {
+    std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
+    permuted = permutations;
+  }
+  permuted.resize(num_samples_oob);
+  permuted.shrink_to_fit();
+  return permuted;
 }
 
 } // namespace ranger
