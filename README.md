@@ -8,7 +8,7 @@ credit: https://thinkr.fr/premiers-pas-en-machine-learning-avec-r-volume-4-rando
 * Wright, M. N. & Ziegler, A. (2017). ranger: A fast implementation of random forests for high dimensional data in C++ and R. J Stat Softw 77:1-17. https://doi.org/10.18637/jss.v077.i01.
 
 ## What does rangerts do
-In this modified version of *ranger* package, we try to get out of the comfort zone of random forest applications. We try to solve a regression problem, and even harder, to predict a time serie, with exogenous variables.     
+In the *rangerts* package, we try to get out of the comfort zone of random forest applications. We try to predict a time serie, with exogenous variables.     
 
 The main idea of this modified version is to test the random forest algorithm using the block bootstrapping (help take time dependency of the data into account) during the period of tree growing, instead of standard resampling mode. To see whether this could help improve model's accuracy.       
 
@@ -16,27 +16,56 @@ In order to benefit from the efficient implementation of the *ranger* package, w
 
 ## New parameters
 All functions are the same as the *ranger* package (even the main function name :stuck_out_tongue:).    
-We added 3 parameters in the ranger function: activate.ts, block.size, bootstrap.ts.    
+We added 3 parameters in the ranger function: bootstrap.ts, by.end, block.size. All these parameters are to be used **with caution** together with the parameters already included in the *ranger* original function.   
 
-* activate.ts: boolean, by default = FALSE, the block bootstrap is disabled in order to maintain *ranger*'s standard behavior.     
-* block.size: the number of observations in one block, by default = 10.    
-* bootstrap.ts: string parameter in **nonoverlapping**, **moving**, **stationary**, **circular**, by default = nonoverlapping, simply because it's longer to tape. Some research works have demonstrated that moving or stationary might be more beneficial.
-
-All these parameters are to be used with caution together with the parameters already included in the *ranger* original function.
-### Build test
-To verify we didn't break anything. :relieved:    
-
-![Travis Build Status](https://travis-ci.org/hyanworkspace/rangerts.svg?branch=master)
-*This is functional if project is public and need an account of travis-ci.org*
+* bootstrap.ts: string parameter, empty (= NULL) for iid bootstrap, or takes its value in **nonoverlapping**, **moving**, **stationary**, **circular**, and **seasonal**, by default = NULL. Some research works have demonstrated that moving or stationary might be more beneficial.    
+* by.end: boolean, by default = TRUE, build block from the end to the start of time series.     
+* block.size: the number of observations per block, by default = 10. In the **stationary** block bootstrapping mode, this parameter define the geometric law with $p = 1/block.size$.     
+* period: the number of observations per period, if **seasonal** bootstrap is selected.
 
 ## Installation
 To install the development version from GitHub using `devtools`, run
 ```R
+# quiet = TRUE to mask c++ compilation messages, optional
 devtools::install_github("BenjaminGoehry/BlocRF/rangerts", quiet = T)
+# to get the a default guide for the rangerts package, use
+browseVignettes("rangerts")
 ```
-## Examples
-```R
 
+
+## Key parameters
+### Bootstrap mode selection and sample fraction
+The default bootstrapping method is the **i.i.d mode, with replacement** in the *ranger* package.    
+
+Variantes exist when changing the parameter `replace = FALSE` or give a weight vector `case.weights` over the training observations to modify the probabilities that some observations will have more chance to be selected in the bag.      
+
+Fraction of observations to sample is 1 by default for sampling with replacement and 0.632 ( ` = (exp(1)-1)/exp(1)` ) for sampling without replacement. This could be changed manuelly by the parameter `sample.fraction` in the `ranger` function.     
+
+Among all the block bootstrapping we implemented, by the nature of their design,  except *nonoverlapping* and *seasonal* (under condition), all others have replacement in the bootstrapped sample inbag.    
+
+The parameter `replace = TRUE` or `FALSE` makes no difference if you use these three block bootstrapping modes, `bootstrap.ts = "moving"`, `bootstrap.ts = "stationary"`, `bootstrap.ts = "circular"`, and `replace = FALSE` with the `bootstrap.ts = "seasonal"` can be dangerous if block.size and period are not properly chosen.     
+
+### Block size
+Our experiments have shown that this is the key parameters to be tuned. As we are treating with time series and weekly data, candidate values can be 4-5 (almost a month), or 52 (a year). Small values might be beneficial to be tested too.    
+
+We suggest train a standard ranger model then study the autocorrelation of the residuals, to get some hint on what values to take for the block size, or maybe directly study the autocorrelation of the target variable.    
+
+## Examples
+We provide an open source dataset of French weekly electricity consumption, along with several features :     
+
+* Time : observation index
+* Day : day of month
+* Month : month of year
+* Year : year
+* NumWeek : This feature goes from 0 to 1, from 1st January to 31th December, and increases linearly
+* Load : electricity consumption in MW, target variable to predict
+* Load1 : lag 1 of load
+* Temp : temperature
+* Temp1 : lag 1 of temperature
+* IPI : industrial index
+* IPI_CVS :
+
+``` R
 library(rangerts)
 # to check the function ranger function helper
 ?rangerts::ranger
