@@ -48,7 +48,7 @@ public:
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
       bool holdout, PredictionType prediction_type, uint num_random_splits, uint max_depth,
-      bool activate_ts, uint block_size, BootstrapTS bootstrap_ts, uint period);
+      BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period);
   void initR(std::string dependent_variable_name, std::unique_ptr<Data> input_data, uint mtry, uint num_trees,
       std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, uint min_node_size,
       std::vector<std::vector<double>>& split_select_weights,
@@ -58,14 +58,14 @@ public:
       std::vector<std::vector<size_t>>& manual_inbag, bool predict_all, bool keep_inbag,
       std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
       uint num_random_splits, bool order_snps, uint max_depth,
-      bool activate_ts, uint block_size, BootstrapTS bootstrap_ts, uint period);
+      BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period);
   void init(std::string dependent_variable_name, MemoryMode memory_mode, std::unique_ptr<Data> input_data, uint mtry,
       std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
       uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
       PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth,
-      bool activate_ts, uint block_size, BootstrapTS bootstrap_ts, uint period);
+      BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period);
   virtual void initInternal(std::string status_variable_name) = 0;
 
   // Grow or predict
@@ -232,9 +232,9 @@ protected:
   std::vector<double> case_weights;
 
   //Bootstrap time series
-  bool activate_ts;
-  uint block_size;
   BootstrapTS bootstrap_ts;
+  bool by_end;
+  uint block_size;
   uint period;
 
   // Pre-selected bootstrap samples (per tree)

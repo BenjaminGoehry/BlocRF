@@ -41,7 +41,7 @@ public:
       bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, std::vector<size_t>* manual_inbag, bool keep_inbag,
       std::vector<double>* sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits,
-      uint max_depth, bool activate_ts, uint block_size, BootstrapTS bootstrap_ts, uint period);
+      uint max_depth, BootstrapTS bootstrap_ts, bool by_end, uint block_size, uint period);
 
   virtual void allocateMemory() = 0;
 
@@ -86,6 +86,7 @@ protected:
 
   size_t dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size_t permuted_sampleID);
   void permuteAndPredictOobSamples(size_t permuted_varID);
+  void cutByBlock(std::vector<size_t>& oob_sampleIDs_block);
   void permuteByBlock(std::vector<size_t>& permutations);
   virtual double computePredictionAccuracyInternal() = 0;
 
@@ -186,9 +187,9 @@ protected:
   size_t last_left_nodeID;
 
   //Bootstrap time series
-  bool activate_ts;
-  uint block_size;
   BootstrapTS bootstrap_ts;
+  bool by_end;
+  uint block_size;
   uint period;
 };
 

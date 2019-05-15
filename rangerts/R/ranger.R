@@ -96,9 +96,9 @@
 ##' @param class.weights Weights for the outcome classes (in order of the factor levels) in the splitting rule (cost sensitive learning). Classification and probability prediction only. For classification the weights are also applied in the majority vote in terminal nodes.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
-##' @param activate.ts Block bootstrapping activation.
-##' @param block.size If block bootstrapping activated, number of blocks.
-##' @param bootstrap.ts Block bootstrapping mode : "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks, and "seasonal" for seasonal blocks.
+##' @param bootstrap.ts Bootstrapping mode : empty for iid observations, "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks, and "seasonal" for seasonal blocks.
+##' @param by.end Logical. Build block by the end of time series or not. Default = TRUE.
+##' @param block.size Number of blocks only if bootstrap has value.
 ##' @param period The number of steps of one period.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
@@ -216,8 +216,8 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                    num.threads = NULL, save.memory = FALSE,
                    verbose = TRUE, seed = NULL,
                    dependent.variable.name = NULL, status.variable.name = NULL,
-                   classification = NULL, activate.ts = FALSE, block.size = 10,
-                   bootstrap.ts = "nonoverlapping", period = 1) {
+                   classification = NULL, bootstrap.ts = NULL,
+                   by.end = TRUE, block.size = 10, period = 1) {
 
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -608,22 +608,22 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 
   ## Bootstrap type
-  if (activate.ts) {
+  if (!is.null(bootstrap.ts)) {
     if (bootstrap.ts == "nonoverlapping") {
-      bootstrap.ts.num <- 1
-    } else if (bootstrap.ts == "moving") {
       bootstrap.ts.num <- 2
-    } else if (bootstrap.ts == "stationary") {
+    } else if (bootstrap.ts == "moving") {
       bootstrap.ts.num <- 3
-    } else if (bootstrap.ts == "circular") {
+    } else if (bootstrap.ts == "stationary") {
       bootstrap.ts.num <- 4
-    } else if (bootstrap.ts == "seasonal") {
+    } else if (bootstrap.ts == "circular") {
       bootstrap.ts.num <- 5
+    } else if (bootstrap.ts == "seasonal") {
+      bootstrap.ts.num <- 6
     } else {
-      stop("Error: Unknown block bootstrap type.")
+      stop("Error: Unknown type of bootstrapping.")
     }
   } else {
-    bootstrap.ts.num <- 0
+    bootstrap.ts.num <- 1
   }
 
   ## Splitting rule
@@ -781,7 +781,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
                       save.memory, splitrule.num, case.weights, use.case.weights, class.weights,
                       predict.all, keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type,
                       num.random.splits, sparse.data, use.sparse.data, order.snps, oob.error, max.depth,
-                      inbag, use.inbag, activate.ts, block.size, bootstrap.ts.num, period)
+                      inbag, use.inbag, bootstrap.ts.num, by.end, block.size, period)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
