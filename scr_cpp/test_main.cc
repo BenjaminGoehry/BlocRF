@@ -8,14 +8,17 @@
 #include "bootstrap_non_overlapping_block.cpp"
 #include "bootstrap_stationary_block.cpp"
 #include "bootstrap_seasonal_block.cpp"
+#include "cutByBlock.cpp"
+#include "permuteByBlock.cpp"
+
 using namespace std;
 
 int main() {
   // general parameters
-  int num_samples = 679;
+  int num_samples = 100;
   double sample_fraction = 0.632;
-  int block_size = 52;
-  int period = 50;
+  int block_size = 10;
+  //int period = 50;
   uint seed = 101;
   bool sample_rep = false;
 
@@ -23,13 +26,14 @@ int main() {
   std::vector<size_t> oob_sampleIDs;
   std::vector<size_t> inbag_counts;
 
-  std::vector<size_t> sampleIDs = bootstrap_seasonal_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep, period);
-  //std::vector<size_t> sampleIDs = bootstrap_non_overlapping_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep);
+  //std::vector<size_t> sampleIDs = bootstrap_seasonal_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep, period);
+  std::vector<size_t> sampleIDs = bootstrap_non_overlapping_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts, sample_rep);
   //std::vector<size_t> sampleIDs = bootstrap_circular_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //std::vector<size_t> sampleIDs = bootstrap_stationary_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //std::vector<size_t> sampleIDs = bootstrap_moving_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //size_t size = bootstrap_stationary_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
-
+  cutByBlock(sampleIDs, block_size);
+  permuteByBlock(sampleIDs, block_size, seed);
   /*
   std::cout << "inbag_counts contains:";
   for (size_t i=0;i < inbag_counts.size();i++)

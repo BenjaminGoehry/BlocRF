@@ -418,7 +418,6 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
 void Tree::permuteAndPredictOobSamples(size_t permuted_varID) {
 
 // Permute OOB sample
-
   if (bootstrap_ts != IID) {
     std::vector<size_t> oob_sampleIDs_block(oob_sampleIDs);
     cutByBlock(oob_sampleIDs_block);
@@ -870,12 +869,14 @@ void Tree::setManualInbag() {
 }
 
 void Tree::permuteByBlock(std::vector<size_t>& permutations) {
-  size_t block_oob_size = (size_t) permutations.size();
-  size_t num_block = (size_t) block_oob_size / block_size;
+  size_t block_oob_size = permutations.size();
+  size_t num_block = (size_t) floor((double) block_oob_size / block_size);
   // initialization
   std::vector<size_t> index_block(num_block);
-  std::vector<size_t> permuted(block_oob_size);
   std::iota(index_block.begin(), index_block.end(), 0);
+
+  std::vector<size_t> permuted;
+  permuted.reserve(block_oob_size);
 
   if (num_block > 1) {
     std::shuffle(index_block.begin(), index_block.end(), random_number_generator);
@@ -884,31 +885,49 @@ void Tree::permuteByBlock(std::vector<size_t>& permutations) {
 
     for (size_t j = 0; j < index_block_size; ++j) {
       for (size_t m = 0; m < block_size; ++m) {
-        permuted.push_back(permutations[index_block[j] + m]);
+        permuted.push_back(permutations[index_block[j] * block_size + m]);
       }
     }
+    permuted.shrink_to_fit();
+    permutations = permuted;
+    permuted.clear();
   }
 }
 
 
 void Tree::cutByBlock(std::vector<size_t>& oob_sampleIDs_block) {
-  std::vector<size_t> oob_block(num_samples_oob);
+  size_t num_samples_oob = oob_sampleIDs_block.size();
+  std::vector<size_t> oob_block;
+  oob_block.reserve(num_samples_oob);
+  std::vector<size_t> tmp_block;
+  tmp_block.reserve(block_size);
 
   if (num_samples_oob > 1) {
     // build the index vector
-    size_t count = 0;
-    for (size_t i = 0; i < (num_samples_oob - 1); ++i) {
-      size_t diff = oob_sampleIDs_block[i + 1] - oob_sampleIDs_block[i];
-      if (diff != 1 || count == block_size) {
-        count = 0;
+    size_t count = 1;
+    size_t i = 0;
+    while ((i + count) < num_samples_oob) {
+      size_t diff = oob_sampleIDs_block[i + count] - oob_sampleIDs_block[i + count - 1];
+      if (diff != 1) {
+        ++i;
       } else {
-        oob_block.push_back(oob_sampleIDs_block[i]);
+        tmp_block.push_back(oob_sampleIDs_block[i + count - 1]);
         ++count;
+      }
+
+      if (count == block_size) {
+        tmp_block.push_back(oob_sampleIDs_block[i + count - 1]);
+        oob_block.insert(oob_block.end(), tmp_block.begin(), tmp_block.end());
+        tmp_block.clear();
+        count = 1;
+        i = i + block_size;
       }
     }
     oob_block.shrink_to_fit();
+    oob_sampleIDs_block = oob_block;
+    oob_sampleIDs_block.shrink_to_fit();
+    oob_block.clear();
   }
-  oob_sampleIDs_block = oob_block;
 }
 
 } // namespace ranger
