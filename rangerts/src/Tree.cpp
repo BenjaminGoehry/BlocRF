@@ -212,15 +212,11 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance) {
 
   size_t num_independent_variables = data->getNumCols() - data->getNoSplitVariables().size();
-
 // Compute normal prediction accuracy for each tree. Predictions already computed..
   double accuracy_normal = computePredictionAccuracyInternal();
 
   prediction_terminal_nodeIDs.clear();
-  prediction_terminal_nodeIDs.resize(num_samples_oob, 0);
-
-// Reserve space for permutations, initialize with oob_sampleIDs
-//  std::vector<size_t> permutations(oob_sampleIDs);
+  prediction_terminal_nodeIDs.resize(num_samples_oob);
 
 // Randomly permute for all independent variables
   for (size_t i = 0; i < num_independent_variables; ++i) {
@@ -234,11 +230,13 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
     }
 
     // Permute and compute prediction accuracy again for this permutation and save difference
-    //permuteAndPredictOobSamples(varID, permutations);
+    std::vector<size_t> oob_sampleIDs_copy = oob_sampleIDs;
     permuteAndPredictOobSamples(varID);
+
     double accuracy_permuted = computePredictionAccuracyInternal();
     double accuracy_difference = accuracy_normal - accuracy_permuted;
     forest_importance[i] += accuracy_difference;
+    oob_sampleIDs = oob_sampleIDs_copy;
 
     // Compute variance
     if (importance_mode == IMP_PERM_BREIMAN) {
@@ -416,26 +414,22 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
 }
 
 void Tree::permuteAndPredictOobSamples(size_t permuted_varID) {
+  std::vector<size_t> permutations(oob_sampleIDs);
 
-// Permute OOB sample
-  if (bootstrap_ts != IID) {
-    std::vector<size_t> oob_sampleIDs_block(oob_sampleIDs);
-    cutByBlock(oob_sampleIDs_block);
-    std::vector<size_t> permutations(oob_sampleIDs_block);
+  if (importance_mode == IMP_PERM_BLOCK) {
+    cutByBlock(permutations);
+    oob_sampleIDs = permutations;
     permuteByBlock(permutations);
-    // For each sample, drop down the tree and add prediction
-    for (size_t i = 0; i < oob_sampleIDs_block.size(); ++i) {
-      size_t nodeID = dropDownSamplePermuted(permuted_varID, oob_sampleIDs_block[i], permutations[i]);
-      prediction_terminal_nodeIDs[i] = nodeID;
-    }
+    size_t new_num_oob_samples = permutations.size();
+    // may have a smaller size
+    prediction_terminal_nodeIDs.resize(new_num_oob_samples);
   } else {
-    std::vector<size_t> permutations(oob_sampleIDs);
     std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
-    // For each sample, drop down the tree and add prediction
-    for (size_t i = 0; i < num_samples_oob; ++i) {
-      size_t nodeID = dropDownSamplePermuted(permuted_varID, oob_sampleIDs[i], permutations[i]);
-      prediction_terminal_nodeIDs[i] = nodeID;
-    }
+  }
+
+  for (size_t i = 0; i < permutations.size(); ++i) {
+    size_t nodeID = dropDownSamplePermuted(permuted_varID, oob_sampleIDs[i], permutations[i]);
+    prediction_terminal_nodeIDs[i] = nodeID;
   }
 }
 

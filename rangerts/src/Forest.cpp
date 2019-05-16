@@ -311,7 +311,7 @@ void Forest::run(bool verbose, bool compute_oob_error) {
       computePredictionError();
     }
 
-    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW || importance_mode == IMP_PERM_RAW) {
+    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_BLOCK || importance_mode == IMP_PERM_LIAW || importance_mode == IMP_PERM_RAW) {
       if (verbose && verbose_out) {
         *verbose_out << "Computing permutation variable importance .." << std::endl;
       }
@@ -632,7 +632,7 @@ void Forest::computePermutationImportance() {
 // Initailize importance and variance
   variable_importance.resize(num_independent_variables, 0);
   std::vector<double> variance;
-  if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
+  if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_BLOCK || importance_mode == IMP_PERM_LIAW) {
     variance.resize(num_independent_variables, 0);
   }
 
@@ -659,7 +659,7 @@ void Forest::computePermutationImportance() {
 // Compute importance
   for (uint i = 0; i < num_threads; ++i) {
     variable_importance_threads[i].resize(num_independent_variables, 0);
-    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
+    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_BLOCK || importance_mode == IMP_PERM_LIAW) {
       variance_threads[i].resize(num_independent_variables, 0);
     }
     threads.emplace_back(&Forest::computeTreePermutationImportanceInThread, this, i,
@@ -687,7 +687,7 @@ void Forest::computePermutationImportance() {
 
 // Sum thread variances
   std::vector<double> variance(num_independent_variables, 0);
-  if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW) {
+  if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_BLOCK || importance_mode == IMP_PERM_LIAW) {
     for (size_t i = 0; i < num_independent_variables; ++i) {
       for (uint j = 0; j < num_threads; ++j) {
         variance[i] += variance_threads[j][i];

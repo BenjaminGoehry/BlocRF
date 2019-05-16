@@ -51,7 +51,7 @@ test_that("importance = permutation", {
                                 seed = 1,
                                 bootstrap.ts = "nonoverlapping",
                                 block.size = block_size,
-                                # importance = "permutation",
+                                importance = "block_permutation",
                                 keep.inbag = T)
-  expect_true(!is.null(rf_no_rep$variable.importance))
+  expect_true(rf_no_rep$variable.importance[1] != 0)
 })

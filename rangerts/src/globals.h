@@ -54,11 +54,12 @@ enum ImportanceMode {
   IMP_NONE = 0,
   IMP_GINI = 1,
   IMP_PERM_BREIMAN = 2,
-  IMP_PERM_LIAW = 4,
   IMP_PERM_RAW = 3,
-  IMP_GINI_CORRECTED = 5
+  IMP_PERM_LIAW = 4,
+  IMP_GINI_CORRECTED = 5,
+  IMP_PERM_BLOCK = 6
 };
-const uint MAX_IMP_MODE = 5;
+const uint MAX_IMP_MODE = 6;
 
 // Split mode
 enum SplitRule {
