@@ -215,7 +215,6 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
 
   if (importance_mode == IMP_PERM_BLOCK){
     cutByBlock();
-    num_samples_oob = oob_sampleIDs.size();
   }
 
   // Compute normal prediction accuracy for each tree. Predictions already computed..
@@ -244,7 +243,7 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
     forest_importance[i] += accuracy_difference;
 
     // Compute variance
-    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_BLOCK) {
+    if (importance_mode == IMP_PERM_BREIMAN) {
       forest_variance[i] += accuracy_difference * accuracy_difference;
     } else if (importance_mode == IMP_PERM_LIAW) {
       forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
@@ -873,7 +872,7 @@ void Tree::setManualInbag() {
 
 void Tree::permuteByBlock(std::vector<size_t>& permutations) {
   size_t block_oob_size = permutations.size();
-  size_t num_block = (size_t) floor((double) block_oob_size / block_size);
+  size_t num_block = (size_t)  block_oob_size / block_size;
   // initialization
   std::vector<size_t> index_block(num_block);
   std::iota(index_block.begin(), index_block.end(), 0);
@@ -927,6 +926,7 @@ void Tree::cutByBlock() {
     }
     oob_block.shrink_to_fit();
     oob_sampleIDs = oob_block;
+    num_samples_oob = oob_sampleIDs.size();
     oob_block.clear();
   }
 }
