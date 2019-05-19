@@ -85,8 +85,8 @@ protected:
   virtual void createEmptyNodeInternal() = 0;
 
   size_t dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size_t permuted_sampleID);
-  void permuteAndPredictOobSamples(size_t permuted_varID);
-  void cutByBlock(std::vector<size_t>& oob_sampleIDs_block);
+  void permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t>& permutations);
+  void cutByBlock();
   void permuteByBlock(std::vector<size_t>& permutations);
   virtual double computePredictionAccuracyInternal() = 0;
 

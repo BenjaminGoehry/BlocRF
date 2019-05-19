@@ -32,7 +32,11 @@ int main() {
   //std::vector<size_t> sampleIDs = bootstrap_stationary_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //std::vector<size_t> sampleIDs = bootstrap_moving_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
   //size_t size = bootstrap_stationary_block(seed, num_samples, sample_fraction, block_size, oob_sampleIDs, inbag_counts);
+  std::vector<size_t> inbag_counts_t(sampleIDs);
+  std::cout << ' ' << inbag_counts_t.size();
   cutByBlock(sampleIDs, block_size);
+  inbag_counts_t = sampleIDs;
+  std::cout << ' ' << inbag_counts_t.size();
   permuteByBlock(sampleIDs, block_size, seed);
   /*
   std::cout << "inbag_counts contains:";
@@ -46,12 +50,12 @@ int main() {
   std::cout << '\n';
   */
 
-  std::cout << "sampleIDs contains:";
-  for (size_t i=0;i < sampleIDs.size();++i)
-    std::cout << ' ' << sampleIDs[i];
-  //std::cout << sampleIDs.size();
-  //std::cout << size;
-  std::cout << '\n';
+  // std::cout << "sampleIDs contains:";
+  // for (size_t i=0;i < sampleIDs.size();++i)
+  //   std::cout << ' ' << sampleIDs[i];
+  // //std::cout << sampleIDs.size();
+  // //std::cout << size;
+  // std::cout << '\n';
 
     //std::cout << sampleIDs;
   return 0;

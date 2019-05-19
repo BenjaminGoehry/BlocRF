@@ -210,15 +210,23 @@ void Tree::predict(const Data* prediction_data, bool oob_prediction) {
 }
 
 void Tree::computePermutationImportance(std::vector<double>& forest_importance, std::vector<double>& forest_variance) {
-
   size_t num_independent_variables = data->getNumCols() - data->getNoSplitVariables().size();
-// Compute normal prediction accuracy for each tree. Predictions already computed..
+  std::vector<size_t> oob_sampleIDs_copy(oob_sampleIDs);
+
+  if (importance_mode == IMP_PERM_BLOCK){
+    cutByBlock();
+    num_samples_oob = oob_sampleIDs.size();
+  }
+
+  // Compute normal prediction accuracy for each tree. Predictions already computed..
   double accuracy_normal = computePredictionAccuracyInternal();
-
   prediction_terminal_nodeIDs.clear();
-  prediction_terminal_nodeIDs.resize(num_samples_oob);
+  prediction_terminal_nodeIDs.resize(num_samples_oob, 0);
 
-// Randomly permute for all independent variables
+  // Reserve space for permutations, initialize with oob_sampleIDs
+  std::vector<size_t> permutations(oob_sampleIDs);
+
+  // Randomly permute for all independent variables
   for (size_t i = 0; i < num_independent_variables; ++i) {
 
     // Skip no split variables
@@ -230,21 +238,26 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
     }
 
     // Permute and compute prediction accuracy again for this permutation and save difference
-    std::vector<size_t> oob_sampleIDs_copy = oob_sampleIDs;
-    permuteAndPredictOobSamples(varID);
-
+    permuteAndPredictOobSamples(varID, permutations);
     double accuracy_permuted = computePredictionAccuracyInternal();
     double accuracy_difference = accuracy_normal - accuracy_permuted;
     forest_importance[i] += accuracy_difference;
-    oob_sampleIDs = oob_sampleIDs_copy;
 
     // Compute variance
-    if (importance_mode == IMP_PERM_BREIMAN) {
+    if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_BLOCK) {
       forest_variance[i] += accuracy_difference * accuracy_difference;
     } else if (importance_mode == IMP_PERM_LIAW) {
       forest_variance[i] += accuracy_difference * accuracy_difference * num_samples_oob;
     }
   }
+
+  if (importance_mode == IMP_PERM_BLOCK){
+    oob_sampleIDs = oob_sampleIDs_copy;
+    num_samples_oob = oob_sampleIDs.size();
+  }
+
+  oob_sampleIDs_copy.clear();
+
 }
 
 void Tree::appendToFile(std::ofstream& file) {
@@ -413,24 +426,20 @@ size_t Tree::dropDownSamplePermuted(size_t permuted_varID, size_t sampleID, size
   return nodeID;
 }
 
-void Tree::permuteAndPredictOobSamples(size_t permuted_varID) {
-  std::vector<size_t> permutations(oob_sampleIDs);
+void Tree::permuteAndPredictOobSamples(size_t permuted_varID, std::vector<size_t>& permutations) {
 
+  // permutation
   if (importance_mode == IMP_PERM_BLOCK) {
-    cutByBlock(permutations);
-    oob_sampleIDs = permutations;
     permuteByBlock(permutations);
-    size_t new_num_oob_samples = permutations.size();
-    // may have a smaller size
-    prediction_terminal_nodeIDs.resize(new_num_oob_samples);
   } else {
     std::shuffle(permutations.begin(), permutations.end(), random_number_generator);
   }
 
-  for (size_t i = 0; i < permutations.size(); ++i) {
+  for (size_t i = 0; i < num_samples_oob; ++i) {
     size_t nodeID = dropDownSamplePermuted(permuted_varID, oob_sampleIDs[i], permutations[i]);
     prediction_terminal_nodeIDs[i] = nodeID;
   }
+
 }
 
 void Tree::bootstrap() {
@@ -889,8 +898,7 @@ void Tree::permuteByBlock(std::vector<size_t>& permutations) {
 }
 
 
-void Tree::cutByBlock(std::vector<size_t>& oob_sampleIDs_block) {
-  size_t num_samples_oob = oob_sampleIDs_block.size();
+void Tree::cutByBlock() {
   std::vector<size_t> oob_block;
   oob_block.reserve(num_samples_oob);
   std::vector<size_t> tmp_block;
@@ -901,16 +909,16 @@ void Tree::cutByBlock(std::vector<size_t>& oob_sampleIDs_block) {
     size_t count = 1;
     size_t i = 0;
     while ((i + count) < num_samples_oob) {
-      size_t diff = oob_sampleIDs_block[i + count] - oob_sampleIDs_block[i + count - 1];
+      size_t diff = oob_sampleIDs[i + count] - oob_sampleIDs[i + count - 1];
       if (diff != 1) {
         ++i;
       } else {
-        tmp_block.push_back(oob_sampleIDs_block[i + count - 1]);
+        tmp_block.push_back(oob_sampleIDs[i + count - 1]);
         ++count;
       }
 
       if (count == block_size) {
-        tmp_block.push_back(oob_sampleIDs_block[i + count - 1]);
+        tmp_block.push_back(oob_sampleIDs[i + count - 1]);
         oob_block.insert(oob_block.end(), tmp_block.begin(), tmp_block.end());
         tmp_block.clear();
         count = 1;
@@ -918,10 +926,10 @@ void Tree::cutByBlock(std::vector<size_t>& oob_sampleIDs_block) {
       }
     }
     oob_block.shrink_to_fit();
-    oob_sampleIDs_block = oob_block;
-    oob_sampleIDs_block.shrink_to_fit();
+    oob_sampleIDs = oob_block;
     oob_block.clear();
   }
 }
+
 
 } // namespace ranger
