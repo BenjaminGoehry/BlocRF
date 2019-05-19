@@ -235,6 +235,16 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
         ++varID;
       }
     }
+    // recalculate the normal accuracy on the blockized oob samples if block permutation
+    if (importance_mode == IMP_PERM_BLOCK) {
+      for (size_t i = 0; i < num_samples_oob; ++i) {
+        size_t nodeID = dropDownSamplePermuted(varID, oob_sampleIDs[i], oob_sampleIDs[i]);
+        prediction_terminal_nodeIDs[i] = nodeID;
+      }
+      accuracy_normal = computePredictionAccuracyInternal();
+      prediction_terminal_nodeIDs.clear();
+      prediction_terminal_nodeIDs.resize(num_samples_oob, 0);
+    }
 
     // Permute and compute prediction accuracy again for this permutation and save difference
     permuteAndPredictOobSamples(varID, permutations);
@@ -256,7 +266,6 @@ void Tree::computePermutationImportance(std::vector<double>& forest_importance, 
   }
 
   oob_sampleIDs_copy.clear();
-
 }
 
 void Tree::appendToFile(std::ofstream& file) {
