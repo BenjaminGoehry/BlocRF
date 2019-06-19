@@ -98,8 +98,8 @@
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param bootstrap.ts Bootstrapping mode : empty for iid observations, "nonoverlapping" is default, "moving" for moving blocks, "circular" for circular blocks, "stationary" for stationary blocks, and "seasonal" for seasonal blocks.
 ##' @param by.end Logical. Build block by the end of time series or not. Default = TRUE.
-##' @param block.size Number of blocks only if bootstrap has value.
-##' @param period The number of steps of one period.
+##' @param block.size Number of observations in one block only if bootstrap by block is activated (bootstrap.ts has non null value).
+##' @param period Number of steps of one period. Only for the 'seasonal' block bootstrap.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.
