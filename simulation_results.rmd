@@ -1,0 +1,121 @@
+---
+title: "Random forest for dependant data: simulation results"
+author: ""
+date: "26/06/2019"
+header-includes:
+   - \usepackage{algorithm}
+   - \usepackage{algorithmic}
+   - \usepackage{amsmath}
+   - \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+   - \renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+output: 
+  pdf_document: 
+    fig_caption: true
+link-citations: yes
+---
+
+
+
+We propose to simulate a first data set corresponding to time series data with seasonnalities. Let:
+
+\[
+  y_t = \cos(\omega_1 t) + \cos(\omega_2 t) + \varepsilon_t
+\]
+
+where $\omega_1= 2\pi/40$ corresponds to a low frequency term and $\omega_2=2\pi/20$ a (relatively) high frequency term. $\varepsilon_t$ is iid gaussian, mean $0$ and variance $\sigma^2$.
+
+
+
+
+
+We have the intuition that dependant random forest methods could work well in the case where the iid forest has an error wich contains time dependant patterns. W illustrate that bellow.
+
+To model a seasonnality of period $T$  with random forest, we build canonical seasonnal variables as $x_t^T= (1,2,...T, 1, 2, ..., T....)$. This is the way we do it to model the yearly seasonnality of the load consumption. Here we choose as input of the forest $x_t^{20}$ which means that the forest doesn't include the covariat that model the low frequencies.
+
+We generate a data set of size $n=200$ and split the data into two sets of size $100$, one for learning the forests, one for forecasting. We set $\sigma=0.5$. An example is plotted on Figure 1.
+
+
+```{r fig1, eval=T, message=FALSE,echo=F, warning=FALSE, fig.width=5, fig.height=5, fig.cap="simulated seasonnal data"}
+Nsim <- 100
+n <- 200
+n0 <- 100
+t <- c(1:n)
+sd <- 1/2
+a <- 1/10
+w <- 2*pi/20
+delta <- w/10
+cos05_t <- cos(0.5*w*t)
+cos1_t <- cos(w*t)
+
+f <- cos05_t + cos1_t  
+t_20 <- rep(c(1:20),  length(t)/20)
+
+eps <- rnorm(n, 0, sd)
+y <- f+eps
+
+plot(t, y, type='l')
+lines(t, f, col='red')
+abline(v=100, lty='dashed')
+
+```
+
+We compute the forecasting mse and present the results on Figure 2 ($\sigma=0.5$) and 3 ($\sigma=1$). In both case the best performances are achieved with moving block boostrap with blocks of sizes arround 20. This corresponds to the seasonnality of the residuals of the iid forest. 
+
+
+
+```{r fig2, eval=T, message=FALSE,echo=F, warning=FALSE, fig.width=5, fig.height=5, fig.cap="mse on the forecasting set in function of the size of the blocks, sigma=1/2"}
+library(yarrr)
+res <- readRDS(file="Results/cos/cos_deux_period_sd05.RDS")
+block.size <- c(1, seq(5,40, by=5))
+
+col <- piratepal("basel")
+plot(block.size, res$mse_forecast_iid, type='b', pch=20, ylim=range(res$mse_forecast_iid, res$mse_forecast_moving, res$mse_forecast_circular, res$mse_forecast_nov)
+     , xlab='size of the blocks', ylab='mse on the forecasting set')
+lines(block.size, res$mse_forecast_moving, type='b', pch=20, col=col[1])
+lines(block.size, res$mse_forecast_circular, type='b', pch=20, col=col[2])
+lines(block.size, res$mse_forecast_nov, type='b', pch=20, col=col[3])
+legend('topright', col=c('black', col[1:3]), c('iid', 'moving block', 'circular','non-overlapping'), bty='n', lty=1)
+
+```
+
+
+```{r fig3, eval=T, message=FALSE,echo=F, warning=FALSE, fig.width=5, fig.height=5, fig.cap="mse on the forecasting set in function of the size of the blocks, sigma=1"}
+library(yarrr)
+res <- readRDS(file="Results/cos/cos_deux_period_sd1.RDS")
+block.size <- c(1, seq(5,40, by=5))
+
+col <- piratepal("basel")
+plot(block.size, res$mse_forecast_iid, type='b', pch=20, ylim=range(res$mse_forecast_iid, res$mse_forecast_moving, res$mse_forecast_circular, res$mse_forecast_nov)
+     , xlab='size of the blocks', ylab='mse on the forecasting set')
+lines(block.size, res$mse_forecast_moving, type='b', pch=20, col=col[1])
+lines(block.size, res$mse_forecast_circular, type='b', pch=20, col=col[2])
+lines(block.size, res$mse_forecast_nov, type='b', pch=20, col=col[3])
+legend('topright', col=c('black', col[1:3]), c('iid', 'moving block', 'circular','non-overlapping'), bty='n', lty=1)
+
+```
+
+
+
+
+
+
+<!-- #Bibliography -->
+
+
+<!-- Breiman (1996) "Bagging predictors". Machine Learning. 24 (2): 123–140. CiteSeerX 10.1.1.32.9399. doi:10.1007/BF00058655. -->
+
+<!-- Brown et al (1996) Brown, G., Wyatt, J. L., & Tiňo, P. (2005). Managing diversity in regression ensembles. Journal of Machine Learning Research, 6(Sep), 1621-1650. -->
+
+
+<!-- Kreiss, J.-P. & Lahiri (2012), Bootstrap Methods for Time Series, Time Series Analysis: Methods and Applications, Elsevier, 2012, 30, 3 - 26. -->
+
+
+<!-- Gaillard, P. & Goude, Y. (2015) Forecasting electricity consumption by aggregating experts; how to design a good set of experts Modeling and Stochastic Learning for Forecasting in High Dimensions, Springer, 2015, 95-115. -->
+
+<!-- Fasiolo, M.; Goude, Y.; Nedellec, R. & Wood, S. N. (2017) Fast calibrated additive quantile regression arXiv preprint arXiv:1707.03307, 2017 -->
+
+
+
+
+
