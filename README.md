@@ -289,3 +289,7 @@ mape <- purrr::map_dbl(model_list,
                                    predict(.x, df_test)$predictions))
 cbind(algo_spec, round(mape, 2))
 ```
+
+Good references:
+ftp://stat.ethz.ch/Research-Reports/87.pdf
+https://projecteuclid.org/download/pdf_1/euclid.aos/1176347265
