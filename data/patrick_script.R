@@ -28,7 +28,7 @@ mape<-function(y,ychap){
 
 
 
-Data <-  readRDS(file="~/Documents/Time\ series\ data/Building/UnivLab_Patrick.RDS")
+Data <-  readRDS(file="~/BlocRF/data/UnivLab_Patrick.RDS")
 
 #Data$LoadNoise.24.min <- Data$Load.24 + rnorm(nrow(Data), 0, min(Data$Load)) #diffinv(rnorm(nrow(Data)-1, 0, sd=sd(Data$Load)))
 #Data$LoadNoise.24.sd <- Data$Load.24 + rnorm(nrow(Data), 0, sd(Data$Load))
@@ -206,12 +206,6 @@ which.min(colMeans(error_mtry))
 which.min(colMeans(error_mtry_1))
 which.min(colMeans(error_mtry_2))
 
-#mtry: 2 pour mape, 3 pour rmse
-#only_schedule: 2 pour les deux, mtry=3 avec oob error     3.06%       20.84802rmse    75.40597 oob
-#only sched w/o instantweek, 2 pour les deux, 3 pour oob     #3.42% mape  23.18503rmse  75.0 oob meme sur test plus mauvais que précédent
-#only sched w/o instantweek w/o toy 3 pour les deux, 2 pour oob bien plus mauvais que le précédent
-#only shed w/o hour & daytype: 2 pour les deux et 2 pour oob 3.37%   22.33   76.46
-#w/o toy mtry = 3 (pour les trois) 3.71%mape
 Monte_carlo_round <- 10
 mtry_tree <- 2
 block_length_seq <- 24#seq(6, 90, by = 6)
@@ -489,7 +483,7 @@ for(j in c(1:Monte_carlo_round)){
     results$RF_nono.importance_block <- RF_nono_importance_block
     
     nomF <- paste0("Result.Monte_carlo_", j, ".mtry_", m, ".RDS")
-    saveRDS(results, file=paste0("~/Documents/randomForest/rf_Time_series/patrick_results/", nomF))
+    saveRDS(results, file=paste0("~/temp/", nomF))
     print(m)
     results <- NULL
   }
@@ -503,14 +497,14 @@ RF_moving_a <- c()
 RF_nono_a <- c()
 for(j in c(1:Monte_carlo_round)){
   nomF <- paste0("Result.Monte_carlo_", j, ".mtry_", 2, ".only_schedule.RDS")
-  file <- readRDS(paste0("~/Documents/randomForest/rf_Time_series/patrick_results/", nomF))
+  file <- readRDS(paste0("~/temp/", nomF))
   RF_a <- c(RF_a, file$RF.rmse_2)
   RF_circ_a <- rbind(RF_circ_a, file$RF_circ.rmse_2[which.min(file$RF_circ.rmse_1)])
   RF_moving_a <- rbind(RF_moving_a, file$RF_moving.rmse_2[which.min(file$RF_moving.rmse_1)])
   RF_nono_a <- rbind(RF_nono_a, file$RF_nono.rmse_2[which.min(file$RF_nono.rmse_1)])
 }
 
-data_rf <- cbind(RF_a,RF_circ_a, RF_moving_a, RF_nono_a)# RF_stat_a, RF_season_1_a)#, RF_season_2_a)
+data_rf <- cbind(RF_a,RF_circ_a, RF_moving_a, RF_nono_a)
 
 block_error_data <- data.frame(variant = as.factor(rep(c("I.I.D", "Circular", "Moving", "Non-overlapping")   , each = Monte_carlo_round)), 
                                rmse = c(data_rf),
@@ -529,8 +523,6 @@ ggplot(block_error_data, aes(x=variant, y=rmse, fill=group)) + geom_boxplot() + 
                                                                size = 10),axis.text=element_text(size=20),axis.title=element_text(size=40,face="bold")) 
 
 
-
-#ici amélioration sur tous les dep bootstraps
 (mean(RF_a)-mean(RF_moving_a))/mean(RF_a)  
 (mean(RF_a)-mean(RF_nono_a))/mean(RF_a)  
 (mean(RF_a)-mean(RF_circ_a))/mean(RF_a)
@@ -563,7 +555,6 @@ for(m in mtry_tree){
 }
 
 
-#"Circ", "Moving", "Nono", "Stat",
 data_error_block_dependent <- data.frame(Block_size = rep(block_length_seq,4), rmse = c(unlist(lapply(error_mtry,c))), 
                                          name = rep(c("Circ", "Moving", "Nono",  "Independent"), each =length(block_length_seq)),
                                          mtry = rep(paste0("mtry = ",mtry_tree), each = 4*length(block_length_seq)))
