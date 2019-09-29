@@ -69,7 +69,7 @@ for(i in c(1:Nsim))
   param$data <- DataSim0
   #param$data.pred <- DataSim1
   
-  res_iid <- lapply(block.size , fit_forest2,  bootstrap.ts="circular", activate.ts=F, param=param, data.pred=DataSim1)
+  res_iid <- lapply(block.size , fit_forest2,  bootstrap.ts=NULL, activate.ts=F, param=param, data.pred=DataSim1)
   res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="moving", activate.ts=T, param=param, data.pred=DataSim1)
   res_circular <- lapply(block.size , fit_forest2,  bootstrap.ts="circular", activate.ts=T, param=param, data.pred=DataSim1)
   res_nov <- lapply(block.size , fit_forest2,  bootstrap.ts="nonoverlapping", activate.ts=T, param=param, data.pred=DataSim1)

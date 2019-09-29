@@ -19,7 +19,7 @@ fit_forest2 <- function(block.size, bootstrap.ts, seed, param, data.pred)
   rf_fit <- do.call(ranger, args=param, quote = FALSE, envir = parent.frame())
   rf_fit.forecast <- predict(rf_fit, data=data.pred)$predictions
   mse_rf_forecast <- mean((data.pred$y-rf_fit.forecast)^2)
- # mse_rf_fit <- mean((param$data$f-predict(rf_fit, data=param$data)$predictions)^2)
+  
   mse_rf_fit <- mean((param$data$y-predict(rf_fit, data=param$data)$predictions)^2)
   mse_rf_fit_oob <- mean((param$data$y-rf_fit$predictions)^2)
   error_fit_oob <- rf_fit$prediction.error

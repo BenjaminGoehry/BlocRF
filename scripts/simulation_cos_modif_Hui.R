@@ -335,8 +335,9 @@ ggplot(freq) +
   facet_wrap(vars(mode), scales = "free")
 
 ggplot(freq) +
-  geom_point(aes(x = 1:nrow(freq), y = freq_10)) +
-  facet_wrap(vars(mode), scales = "free")
+  geom_point(aes(x = rep(1:(nrow(freq)/4), 4), y = freq_80)) +
+  facet_wrap(vars(mode)) +
+  ylim(480, 540)
 
 ggplot(freq) +
   geom_point(aes(x = 1:nrow(freq), y = freq_20)) +

@@ -14,7 +14,6 @@ fit_forest2 <- function(block.size, bootstrap.ts, activate.ts, param, data.pred)
 {
   param$block.size <- block.size
   param$bootstrap.ts <- bootstrap.ts
-  param$activate.ts <- activate.ts
   
   rf_fit <- do.call(ranger, args=param, quote = FALSE, envir = parent.frame())
   rf_fit.forecast <- predict(rf_fit, data=data.pred)$predictions

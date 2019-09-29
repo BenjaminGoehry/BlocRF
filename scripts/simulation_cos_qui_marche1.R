@@ -61,24 +61,23 @@ mse_forecast_circular_mat <- NULL
 mse_forecast_nov_mat <- NULL
 
 
-for(i in c(1:Nsim))
-{
+for(i in c(1:Nsim)) {
   # eps <- rnorm(n, 0, sd)
   # y <- a*t+eps
   eps <- rnorm(n, 0, sd)
   y <- f+eps
   
-  DataSim <- data.frame(y, t, cos1_t, cos2_t, f=f, t_20)
+  DataSim <- data.frame(y, t, cos1_t, cos05_t, f=f, t_20)
   
   #DataSim <- data.frame(y, t, f=a*t)
   DataSim0 <- DataSim[1:n0,]
   DataSim1 <- DataSim[(n0+1):n,]
   param$data <- DataSim0
   
-  res_iid <- lapply(block.size , fit_forest2,  bootstrap.ts="circular", activate.ts=F)
-  res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="moving", activate.ts=T)
-  res_circular <- lapply(block.size , fit_forest2,  bootstrap.ts="circular", activate.ts=T)
-  res_nov <- lapply(block.size , fit_forest2,  bootstrap.ts="nonoverlapping", activate.ts=T)
+  res_iid <- lapply(block.size , fit_forest2,  bootstrap.ts=NULL, param = param, data.pred=DataSim1)
+  res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="moving", param = param, data.pred=DataSim1)
+  res_circular <- lapply(block.size , fit_forest2,  bootstrap.ts="circular", param = param, data.pred=DataSim1)
+  res_nov <- lapply(block.size , fit_forest2,  bootstrap.ts="nonoverlapping", param = param, data.pred=DataSim1)
   
   mse_fit_iid <- lapply(res_iid, function(x){x$mse_fit})%>%unlist
   mse_fit_moving <- lapply(res_moving, function(x){x$mse_fit})%>%unlist
@@ -132,10 +131,10 @@ legend('topright', col=c('black', col[1:3]), c('iid', 'moving block', 'circular'
 
  
 
-res_circular<-  fit_forest2(block.size=40, bootstrap.ts="moving", activate.ts=T)
+res_circular<-  fit_forest2(block.size=40, bootstrap.ts="moving")
 fit_circular <- predict(res_circular$rf_fit, data=DataSim0)$prediction
 
-res_iid<-  fit_forest2(block.size=5, bootstrap.ts="circular", activate.ts=F)
+res_iid<-  fit_forest2(block.size=5, bootstrap.ts="circular")
 fit_iid <- predict(res_iid$rf_fit, data=DataSim0)$prediction
 
 
@@ -184,8 +183,8 @@ plot(DataSim$cos_t,type='l')
 
 
 
-#res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="moving", activate.ts=T)
-res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="circular", activate.ts=T)
+#res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="moving")
+res_moving <- lapply(block.size , fit_forest2,  bootstrap.ts="circular")
 
 
 mse_fit_moving <- lapply(res_moving, function(x){x$mse_fit})%>%unlist
@@ -227,11 +226,11 @@ lines(DataSim1$t, rf_fit.forecast, col=col[1])
 
 #####circular moving block boostrap  
 #set.seed(seed=100)
-mse_rf_cir <- lapply(block.size , fit_forest,  bootstrap.ts="circular", activate.ts=T)%>%unlist
+mse_rf_cir <- lapply(block.size , fit_forest,  bootstrap.ts="circular")%>%unlist
 
 #####non-overlapping
 #set.seed(seed=100)
-mse_rf_nov <- lapply(block.size , fit_forest,  bootstrap.ts="nonoverlapping", activate.ts=T)%>%unlist
+mse_rf_nov <- lapply(block.size , fit_forest,  bootstrap.ts="nonoverlapping")%>%unlist
 
 col <- piratepal("basel")
 
